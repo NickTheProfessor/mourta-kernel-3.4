@@ -158,7 +158,7 @@ extern unsigned long tegra_nck_start;
 extern unsigned long tegra_nck_size;
 #endif
 
-extern struct sys_timer tegra_timer;
+extern void tegra_init_timer(void);
 
 enum board_fab {
 	BOARD_FAB_A = 0,

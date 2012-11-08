@@ -220,7 +220,7 @@ static struct of_device_id timer_ids[] = {
 	{},
 };
 
-static void __init sirfsoc_of_timer_map(void)
+void __init sirfsoc_of_timer_map(void)
 {
 	struct device_node *np;
 	const unsigned int *intspec;
@@ -239,7 +239,3 @@ static void __init sirfsoc_of_timer_map(void)
 
 	of_node_put(np);
 }
-
-struct sys_timer sirfsoc_timer = {
-	.init = sirfsoc_timer_init,
-};

@@ -138,10 +138,6 @@ static void __init pxa910_timer_init(void)
 	timer_init(IRQ_PXA910_AP1_TIMER1);
 }
 
-struct sys_timer pxa910_timer = {
-	.init	= pxa910_timer_init,
-};
-
 /* on-chip devices */
 
 /* NOTE: there are totally 3 UARTs on PXA910:

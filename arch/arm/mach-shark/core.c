@@ -146,10 +146,6 @@ static void __init shark_timer_init(void)
 	setup_irq(IRQ_TIMER, &shark_timer_irq);
 }
 
-static struct sys_timer shark_timer = {
-	.init		= shark_timer_init,
-};
-
 static void shark_init_early(void)
 {
 	disable_hlt();

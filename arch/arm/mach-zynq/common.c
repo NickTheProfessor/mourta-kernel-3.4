@@ -114,6 +114,6 @@ MACHINE_START(XILINX_EP107, "Xilinx Zynq Platform")
 	.init_irq	= xilinx_irq_init,
 	.handle_irq	= gic_handle_irq,
 	.init_machine	= xilinx_init_machine,
-	.timer		= &xttcpss_sys_timer,
+	.init_time	= xilinx_zynq_timer_init,
 	.dt_compat	= xilinx_dt_match,
 MACHINE_END

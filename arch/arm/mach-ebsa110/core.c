@@ -328,6 +328,6 @@ MACHINE_START(EBSA110, "EBSA110")
 	.map_io		= ebsa110_map_io,
 	.init_early	= ebsa110_init_early,
 	.init_irq	= ebsa110_init_irq,
-	.timer		= &ebsa110_timer,
+	.init_time	= ebsa110_timer_init,
 	.restart	= ebsa110_restart,
 MACHINE_END

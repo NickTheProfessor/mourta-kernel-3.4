@@ -191,10 +191,6 @@ static void __init mmp2_timer_init(void)
 	timer_init(IRQ_MMP2_TIMER1);
 }
 
-struct sys_timer mmp2_timer = {
-	.init	= mmp2_timer_init,
-};
-
 /* on-chip devices */
 MMP2_DEVICE(uart1, "pxa2xx-uart", 0, UART1, 0xd4030000, 0x30, 4, 5);
 MMP2_DEVICE(uart2, "pxa2xx-uart", 1, UART2, 0xd4017000, 0x30, 20, 21);
