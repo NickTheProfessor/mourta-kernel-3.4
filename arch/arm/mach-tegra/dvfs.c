@@ -1171,10 +1171,9 @@ int __init tegra_dvfs_late_init(void)
 
 	mutex_unlock(&dvfs_lock);
 
-#ifdef CONFIG_TEGRA_SILICON_PLATFORM
-	if (!connected)
+	if (!connected && tegra_platform_is_silicon())
 		return -ENODEV;
-#endif
+
 	register_pm_notifier(&tegra_dvfs_nb);
 	register_reboot_notifier(&tegra_dvfs_reboot_nb);
 
