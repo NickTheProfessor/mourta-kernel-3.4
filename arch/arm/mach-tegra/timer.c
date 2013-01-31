@@ -50,8 +50,6 @@
 #include "timer.h"
 #include "fuse.h"
 
-extern int __init arch_timer_register(struct arch_timer *at);
-
 static void __iomem *timer_reg_base = IO_ADDRESS(TEGRA_TMR1_BASE);
 static void __iomem *rtc_base = IO_ADDRESS(TEGRA_RTC_BASE);
 
@@ -363,6 +361,8 @@ static int __init tegra_init_arch_timer(void)
 	if (!local_timer_is_architected())
 		return -ENODEV;
 
+	arch_timer_of_register();
+
 	err = arch_timer_sched_clock_init();
 	if (err) {
 		pr_err("%s: Unable to initialize arch timer sched_clock: %d\n",
@@ -376,30 +376,8 @@ static int __init tegra_init_arch_timer(void)
 	return 0;
 }
 
-static struct arch_timer tegra_arch_timer = {
-	.res[0] = {
-		.start	= 29,
-		.end	= 29,
-		.flags	= IORESOURCE_IRQ,
-	},
-	.res[1] = {
-		.start	= 30,
-		.end	= 30,
-		.flags	= IORESOURCE_IRQ,
-	},
-};
-
 static void __init tegra_init_late_timer(void)
-{
-	int err = -ENODEV;
-
-	if (arch_timer_initialized) {
-		err = arch_timer_register(&tegra_arch_timer);
-		if (err)
-			pr_err("%s: Unable to register arch timer: %d\n",
-			     __func__, err);
-	}
-}
+{}
 
 #ifdef CONFIG_PM_SLEEP
 
