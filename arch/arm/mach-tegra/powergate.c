@@ -577,15 +577,15 @@ int tegra_powergate_init_refcount(void)
 int __init tegra_powergate_init(void)
 {
 	switch (tegra_chip_id) {
-		case TEGRA20:
+		case TEGRA_CHIPID_TEGRA2:
 			pg_ops = tegra2_powergate_init_chip_support();
 			break;
 
-		case TEGRA30:
+		case TEGRA_CHIPID_TEGRA3:
 			pg_ops = tegra3_powergate_init_chip_support();
 			break;
 
-		case TEGRA11X:
+		case TEGRA_CHIPID_TEGRA11:
 			pg_ops = tegra11x_powergate_init_chip_support();
 			break;
 

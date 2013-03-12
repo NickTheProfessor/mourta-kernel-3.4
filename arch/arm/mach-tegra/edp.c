@@ -796,7 +796,7 @@ static int __init init_cpu_edp_limits_lookup(void)
 
 void tegra_recalculate_cpu_edp_limits(void)
 {
-	if (tegra_chip_id != TEGRA11X)
+	if (tegra_chip_id == TEGRA_CHIPID_TEGRA11)
 		return;
 
 	if (init_cpu_edp_limits_calculated() == 0)
@@ -821,15 +821,15 @@ void __init tegra_init_cpu_edp_limits(unsigned int regulator_mA)
 	regulator_cur = regulator_mA + OVERRIDE_DEFAULT;
 
 	switch (tegra_chip_id) {
-	case TEGRA30:
+	case TEGRA_CHIPID_TEGRA3:
 		if (init_cpu_edp_limits_lookup() == 0)
 			return;
 		break;
-	case TEGRA11X:
+	case TEGRA_CHIPID_TEGRA11:
 		if (init_cpu_edp_limits_calculated() == 0)
 			return;
 		break;
-	case TEGRA20:
+	case TEGRA_CHIPID_TEGRA2:
 	default:
 		BUG();
 		break;

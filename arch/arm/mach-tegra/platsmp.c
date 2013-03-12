@@ -342,7 +342,7 @@ int tegra_boot_secondary(unsigned int cpu, struct task_struct *idle)
 #endif
 
 	switch (tegra_chip_id) {
-	case TEGRA20:
+	case TEGRA_CHIPID_TEGRA2:
 		/*
 		 * Unhalt the CPU. If the flow controller was used to power-gate
 		 * the CPU this will cause the flow controller to stop driving
@@ -352,7 +352,7 @@ int tegra_boot_secondary(unsigned int cpu, struct task_struct *idle)
 		flowctrl_write_cpu_halt(cpu, 0);
 		status = tegra20_power_up_cpu(cpu);
 		break;
-	case TEGRA30:
+	case TEGRA_CHIPID_TEGRA3:
 		/*
 		 * Unhalt the CPU. If the flow controller was used to power-gate
 		 * the CPU this will cause the flow controller to stop driving
@@ -362,7 +362,7 @@ int tegra_boot_secondary(unsigned int cpu, struct task_struct *idle)
 		flowctrl_write_cpu_halt(cpu, 0);
 		status = tegra30_power_up_cpu(cpu);
 		break;
-	case TEGRA11X:
+	case TEGRA_CHIPID_TEGRA11:
 		status = tegra11x_power_up_cpu(cpu);
 		break;
 	default:
