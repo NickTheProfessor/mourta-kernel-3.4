@@ -1221,7 +1221,7 @@ static int nvhost_pod_handler(struct devfreq *devfreq, unsigned int event,
 	return ret;
 }
 
-const struct devfreq_governor nvhost_podgov = {
+struct devfreq_governor nvhost_podgov = {
 	.name = "nvhost_podgov",
 	.get_target_freq = nvhost_pod_estimate_freq,
 	.event_handler = nvhost_pod_handler,
