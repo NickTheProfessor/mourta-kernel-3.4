@@ -125,7 +125,7 @@ unsigned long tegra_lp0_vec_size;
 #ifdef CONFIG_TEGRA_NVDUMPER
 unsigned long nvdumper_reserved;
 #endif
-#ifdef CONFIG_TRUSTED_FOUNDATIONS
+#ifdef CONFIG_TEGRA_USE_SECURE_KERNEL
 unsigned long tegra_tzram_start;
 unsigned long tegra_tzram_size;
 #endif
@@ -442,7 +442,7 @@ static __initdata struct tegra_clk_init_table tegra11x_cbus_init_table[] = {
 
 #ifdef CONFIG_CACHE_L2X0
 #if defined(CONFIG_ARCH_TEGRA_3x_SOC) || defined(CONFIG_ARCH_TEGRA_2x_SOC)
-#ifdef CONFIG_TRUSTED_FOUNDATIONS
+#ifdef CONFIG_TEGRA_USE_SECURE_KERNEL
 static void tegra_cache_smc(bool enable, u32 arg)
 {
 	void __iomem *p = IO_ADDRESS(TEGRA_ARM_PERIF_BASE) + 0x3000;
@@ -511,18 +511,18 @@ static void tegra_l2x0_disable(void)
 	tegra_cache_smc(false, l2x0_way_mask);
 	local_irq_restore(flags);
 }
-#endif	/* CONFIG_TRUSTED_FOUNDATIONS  */
+#endif	/* CONFIG_TEGRA_USE_SECURE_KERNEL  */
 
 void tegra_init_cache(bool init)
 {
 	void __iomem *p = IO_ADDRESS(TEGRA_ARM_PERIF_BASE) + 0x3000;
 	u32 aux_ctrl;
-#ifndef CONFIG_TRUSTED_FOUNDATIONS
+#ifndef CONFIG_TEGRA_USE_SECURE_KERNEL
 	u32 cache_type;
 	u32 tag_latency, data_latency;
 #endif
 
-#ifdef CONFIG_TRUSTED_FOUNDATIONS
+#ifdef CONFIG_TEGRA_USE_SECURE_KERNEL
    if (init) {
 	/* issue the SMC to enable the L2 */
 	aux_ctrl = readl_relaxed(p + L2X0_AUX_CTRL);
@@ -911,7 +911,7 @@ static int __init tegra_tsec_arg(char *options)
 }
 early_param("tsec", tegra_tsec_arg);
 
-#ifdef CONFIG_TRUSTED_FOUNDATIONS
+#ifdef CONFIG_TEGRA_USE_SECURE_KERNEL
 static int __init tegra_tzram_arg(char *options)
 {
 	char *p = options;
@@ -1755,7 +1755,7 @@ void __init tegra_reserve(unsigned long carveout_size, unsigned long fb_size,
 	}
 #endif
 
-#ifdef CONFIG_TRUSTED_FOUNDATIONS
+#ifdef CONFIG_TEGRA_USE_SECURE_KERNEL
 	pr_info("Tzram:               %08lx - %08lx\n",
 		tegra_tzram_start,
 		tegra_tzram_size ?

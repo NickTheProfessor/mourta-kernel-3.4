@@ -211,7 +211,7 @@ ENDPROC(tegra_flush_l1_cache)
  */
 ENTRY(tegra_sleep_cpu_finish)
 	mov	r4, r0
-#ifdef CONFIG_TRUSTED_FOUNDATIONS
+#if defined(CONFIG_TEGRA_USE_SECURE_KERNEL)
 	ldr	r0, =0xFFFFFFFC
 	ldr	r1, =0xFFFFFFE4
 	ldr	r2, =TEGRA_RESET_HANDLER_BASE
@@ -317,7 +317,7 @@ ENTRY(tegra_cpu_pllp)
 ENDPROC(tegra_cpu_pllp)
 #endif
 
-#ifdef CONFIG_TRUSTED_FOUNDATIONS
+#if defined(CONFIG_TEGRA_USE_SECURE_KERNEL)
 /*
  * tegra_generic_smc
  *

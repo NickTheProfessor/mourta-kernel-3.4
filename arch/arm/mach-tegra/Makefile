@@ -169,7 +169,7 @@ obj-y                                   += board-panel.o
 obj-$(CONFIG_TEGRA_WAKEUP_MONITOR)      += tegra_wakeup_monitor.o
 obj-$(CONFIG_TEGRA_PCI)                 += pcie.o
 
-obj-$(CONFIG_TRUSTED_FOUNDATIONS)       += tegra_tzram.o
+obj-$(CONFIG_TEGRA_USE_SECURE_KERNEL)   += tegra_tzram.o
 
 # MC error reporting.
 ifeq ($(CONFIG_ARCH_TEGRA_2x_SOC),)

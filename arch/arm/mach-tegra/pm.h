@@ -280,7 +280,7 @@ void tegra_smp_clear_power_mask(void);
 static inline void tegra_smp_clear_power_mask(void){}
 #endif
 
-#ifdef CONFIG_TRUSTED_FOUNDATIONS
+#ifdef CONFIG_TEGRA_USE_SECURE_KERNEL
 void tegra_generic_smc(u32 type, u32 subtype, u32 arg);
 void tegra_generic_smc_local(u32 type, u32 subtype, u32 arg);
 void tegra_generic_smc_uncached(u32 type, u32 subtype, u32 arg);

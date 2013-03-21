@@ -80,7 +80,7 @@ ENDPROC(tegra_secondary_startup)
  *	  re-enabling sdram.
  */
 ENTRY(tegra_resume)
-#ifdef CONFIG_TRUSTED_FOUNDATIONS
+#ifdef CONFIG_TEGRA_USE_SECURE_KERNEL
 	mov32	r1, TEGRA_TMRUS_BASE
 	ldr	r0, [r1]
 	adr	r1, BSYM(tegra_resume_entry_time)
@@ -114,7 +114,7 @@ ENTRY(tegra_resume)
 	str	r1, [r0]
 #endif
 
-#ifdef CONFIG_TRUSTED_FOUNDATIONS
+#ifdef CONFIG_TEGRA_USE_SECURE_KERNEL
 #ifndef CONFIG_ARCH_TEGRA_11x_SOC
 	mov32	r1, TEGRA_TMRUS_BASE
 	ldr	r0, [r1]
@@ -133,7 +133,7 @@ ENTRY(tegra_resume)
 	b	cpu_resume
 ENDPROC(tegra_resume)
 
-#ifdef CONFIG_TRUSTED_FOUNDATIONS
+#ifdef CONFIG_TEGRA_USE_SECURE_KERNEL
 	.globl tegra_resume_timestamps_start
 #ifndef CONFIG_ARCH_TEGRA_11x_SOC
 	.globl tegra_resume_smc_entry_time
@@ -309,7 +309,7 @@ ENTRY(__tegra_cpu_reset_handler)
 #if DEBUG_CPU_RESET_HANDLER
 	b	.
 #endif
-#ifndef CONFIG_TRUSTED_FOUNDATIONS
+#ifndef CONFIG_TEGRA_USE_SECURE_KERNEL
 	cpsid	aif, 0x13			@ SVC mode, interrupts disabled
 	mrc	p15, 0, r0, c0, c0, 0		@ read main ID register
 	and	r5, r0, #0x00f00000		@ variant
