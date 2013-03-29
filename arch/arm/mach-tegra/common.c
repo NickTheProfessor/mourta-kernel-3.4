@@ -42,6 +42,7 @@
 #include <asm/hardware/cache-l2x0.h>
 #include <asm/hardware/gic.h>
 #include <asm/system.h>
+#include <asm/hardware/cache-l2x0.h>
 #include <asm/dma-mapping.h>
 
 #include <mach/hardware.h>
