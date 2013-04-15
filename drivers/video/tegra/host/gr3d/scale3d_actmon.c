@@ -432,8 +432,8 @@ void nvhost_scale3d_actmon_init(struct platform_device *dev)
 
 	nvhost_scale3d_calibrate_emc();
 
-	if (device_create_file(&dev->dev, &dev_attr_load))
-		goto err_create_sysfs_entry;
+	/* Initialize actmon */
+	actmon_op().debug_init(nvhost_get_host(dev), pdata->debugfs);
 
 	/* Start using devfreq */
 	pdata->power_manager = devfreq_add_device(&dev->dev,
