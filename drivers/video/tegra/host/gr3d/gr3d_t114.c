@@ -25,7 +25,7 @@
 #include "gr3d.h"
 #include "chip_support.h"
 #include "nvhost_memmgr.h"
-#include "scale3d_actmon.h"
+#include "nvhost_scale.h"
 #include "nvhost_job.h"
 #include "nvhost_acm.h"
 #include "class_ids.h"
