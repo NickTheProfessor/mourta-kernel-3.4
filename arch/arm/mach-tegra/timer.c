@@ -170,8 +170,8 @@ static struct irqaction tegra_cputimer_irq[] = {
 	CPU_TIMER_IRQ_ACTION(3, INT_TMR6),
 #endif
 };
-#endif
-#endif
+#endif /* CONFIG_ARCH_TEGRA_2x_SOC */
+#endif /* CONFIG_ARM_ARCH_TIMER && CONFIG_HAVE_ARM_TWD */
 
 static int tegra_timer_set_next_event(unsigned long cycles,
 					 struct clock_event_device *evt)
@@ -367,7 +367,7 @@ static void __init tegra_init_late_timer(void)
 	if (err)
 		pr_err("twd_timer_register failed %d\n", err);
 }
-#else
+#else /* !CONFIG_HAVE_ARM_TWD */
 #define tegra_twd_get_state	do {} while(0)
 #define tegra_twd_suspend	do {} while(0)
 #define tegra_twd_resume	do {} while(0)
@@ -397,6 +397,9 @@ static int __cpuinit tegra_local_timer_setup(struct clock_event_device *evt)
 	evt->min_delta_ns =
 		clockevent_delta2ns(0x1, evt);
 	tegra_cputimer_irq[cpu].dev_id = clkevt;
+
+	clockevents_register_device(evt);
+
 	ret = setup_irq(tegra_cputimer_irq[cpu].irq, &tegra_cputimer_irq[cpu]);
 	if (ret) {
 		pr_err("Failed to register CPU timer IRQ for CPU %d: " \
@@ -404,6 +407,7 @@ static int __cpuinit tegra_local_timer_setup(struct clock_event_device *evt)
 			tegra_cputimer_irq[cpu].irq, ret);
 		return ret;
 	}
+
 	evt->irq = tegra_cputimer_irq[cpu].irq;
 	ret = irq_set_affinity(tegra_cputimer_irq[cpu].irq, cpumask_of(cpu));
 	if (ret) {
@@ -412,7 +416,7 @@ static int __cpuinit tegra_local_timer_setup(struct clock_event_device *evt)
 			tegra_cputimer_irq[cpu].irq, ret);
 		return ret;
 	}
-	clockevents_register_device(evt);
+
 	enable_percpu_irq(evt->irq, IRQ_TYPE_LEVEL_HIGH);
 
 	return 0;
@@ -460,7 +464,7 @@ static int __init hotplug_cpu_register(void)
 	return register_cpu_notifier(&hotplug_notifier_block);
 }
 early_initcall(hotplug_cpu_register);
-#endif
+#endif /* CONFIG_PM_SLEEP && CONFIG_HOTPLUG_CPU */
 
 void __init tegra_cpu_timer_init(void)
 {
@@ -506,8 +510,8 @@ static void __init tegra_init_late_timer(void)
 {
 	local_timer_register(&tegra_local_timer_ops);
 }
-#endif
-#endif
+#endif /* CONFIG_ARM_ARCH_TIMER */
+#endif /* CONFIG_HAVE_ARM_TWD */
 
 #ifdef CONFIG_ARM_ARCH_TIMER
 
@@ -696,7 +700,7 @@ int tegra_cpu_timer_get_remain(s64 *time)
 	return ret;
 }
 
-#endif
+#endif /* CONFIG_PM_SLEEP */
 
 #else
 static inline int tegra_init_arch_timer(void) { return -ENODEV; }
