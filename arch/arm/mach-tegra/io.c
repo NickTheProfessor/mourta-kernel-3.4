@@ -26,6 +26,7 @@
 #include <linux/mm.h>
 #include <linux/io.h>
 #include <linux/dma-mapping.h>
+#include <linux/tegra-soc.h>
 
 #include <asm/page.h>
 #include <asm/mach/map.h>

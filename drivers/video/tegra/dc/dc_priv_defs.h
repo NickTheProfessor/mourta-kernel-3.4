@@ -29,6 +29,7 @@
 #include <linux/switch.h>
 #include <linux/nvhost.h>
 #include <linux/types.h>
+#include <linux/tegra-soc.h>
 
 #include <mach/dc.h>
 

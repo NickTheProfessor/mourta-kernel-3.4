@@ -39,7 +39,7 @@
 #include <linux/export.h>
 #include <linux/slab.h>
 #include <mach/clk.h>
-#include <mach/hardware.h>
+#include <linux/tegra-soc.h>
 
 #include <linux/notifier.h>
 #include <linux/tegra-throughput.h>

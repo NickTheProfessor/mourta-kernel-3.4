@@ -18,6 +18,7 @@
 #include <linux/io.h>
 #include <linux/cpumask.h>
 #include <linux/bitops.h>
+#include <linux/tegra-soc.h>
 
 #include <asm/cacheflush.h>
 

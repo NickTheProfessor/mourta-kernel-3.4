@@ -36,6 +36,7 @@
 #include <linux/sys_soc.h>
 #include <linux/export.h>
 #include <linux/bootmem.h>
+#include <linux/tegra-soc.h>
 #include <trace/events/nvsecurity.h>
 
 #include <asm/soc.h>
@@ -45,7 +46,6 @@
 #include <asm/hardware/cache-l2x0.h>
 #include <asm/dma-mapping.h>
 
-#include <mach/hardware.h>
 #include <mach/iomap.h>
 #include <mach/powergate.h>
 #include <mach/tegra_smmu.h>

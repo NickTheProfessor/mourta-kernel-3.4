@@ -33,6 +33,10 @@
 
 #include <linux/edp.h>
 
+#ifdef CONFIG_TEGRA_PRE_SILICON_SUPPORT
+#include <linux/tegra-soc.h>
+#endif
+
 #include "sdhci.h"
 
 #define DRIVER_NAME "sdhci"

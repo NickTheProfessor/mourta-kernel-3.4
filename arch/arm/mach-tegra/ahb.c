@@ -27,7 +27,6 @@
 #include <linux/syscore_ops.h>
 
 #include <mach/iomap.h>
-#include <mach/hardware.h>
 
 #define AHB_ARBITRATION_DISABLE		0x00
 #define AHB_ARBITRATION_PRIORITY_CTRL	0x04

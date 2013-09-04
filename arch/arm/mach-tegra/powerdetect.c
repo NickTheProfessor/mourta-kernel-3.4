@@ -27,6 +27,7 @@
 #include <linux/module.h>
 
 #include <mach/iomap.h>
+#include <linux/tegra-soc.h>
 
 #include "board.h"
 #include "fuse.h"

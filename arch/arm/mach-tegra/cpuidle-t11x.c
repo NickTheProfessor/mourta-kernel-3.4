@@ -40,6 +40,7 @@
 #include <linux/clk.h>
 #include <linux/cpu_pm.h>
 #include <linux/module.h>
+#include <linux/tegra-soc.h>
 
 #include <asm/cacheflush.h>
 #include <asm/hardware/gic.h>

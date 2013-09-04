@@ -24,7 +24,7 @@
 #include <linux/slab.h>
 
 #include <mach/clk.h>
-#include <mach/hardware.h>
+#include <linux/tegra-soc.h>
 
 #include <governor.h>
 

@@ -25,6 +25,7 @@
 #include <linux/module.h>
 #include <linux/uaccess.h>
 #include <linux/edp.h>
+#include <linux/tegra-soc.h>
 #include <mach/edp.h>
 
 #include "fuse.h"

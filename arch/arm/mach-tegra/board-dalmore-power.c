@@ -42,7 +42,6 @@
 #include <mach/irqs.h>
 #include <mach/edp.h>
 #include <mach/gpio-tegra.h>
-#include <mach/hardware.h>
 
 #include "cpu-tegra.h"
 #include "pm.h"

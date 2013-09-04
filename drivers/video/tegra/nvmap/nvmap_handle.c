@@ -34,6 +34,7 @@
 #include <linux/moduleparam.h>
 #include <linux/module.h>
 #include <linux/nvmap.h>
+#include <linux/tegra-soc.h>
 
 #include <asm/cacheflush.h>
 #include <asm/outercache.h>

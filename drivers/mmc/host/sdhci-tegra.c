@@ -37,6 +37,7 @@
 #include <linux/seq_file.h>
 #include <linux/reboot.h>
 #include <linux/devfreq.h>
+#include <linux/tegra-soc.h>
 
 #include <mach/gpio-tegra.h>
 #include <mach/sdhci.h>

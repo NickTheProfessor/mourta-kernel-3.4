@@ -29,11 +29,11 @@
 #include <linux/uaccess.h>
 #include <linux/module.h>
 #include <linux/platform_device.h>
+#include <linux/tegra-soc.h>
 
 #include <mach/iomap.h>
 #include <mach/irqs.h>
-#include <mach/hardware.h>
-
+#
 #include "tegra_cl_dvfs.h"
 #include "clock.h"
 #include "dvfs.h"

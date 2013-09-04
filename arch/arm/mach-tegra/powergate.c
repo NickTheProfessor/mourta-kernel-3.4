@@ -29,6 +29,7 @@
 #include <linux/io.h>
 #include <linux/seq_file.h>
 #include <linux/spinlock.h>
+#include <linux/tegra-soc.h>
 #include <trace/events/power.h>
 #include <asm/atomic.h>
 

@@ -32,6 +32,7 @@
 #include <linux/suspend.h>
 #include <linux/delay.h>
 #include <linux/reboot.h>
+#include <linux/tegra-soc.h>
 
 #include <mach/clk.h>
 

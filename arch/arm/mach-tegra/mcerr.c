@@ -30,8 +30,8 @@
 #include <linux/seq_file.h>
 #include <linux/moduleparam.h>
 #include <linux/spinlock_types.h>
-
-#include <mach/hardware.h>
+#include <linux/tegra-soc.h>
+ 
 #include <mach/iomap.h>
 #include <mach/irqs.h>
 

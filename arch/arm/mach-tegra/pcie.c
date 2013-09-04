@@ -48,6 +48,7 @@
 #include <mach/iomap.h>
 #include <mach/clk.h>
 #include <mach/powergate.h>
+#include <linux/tegra-soc.h>
 #include <mach/pci.h>
 
 #include "board.h"

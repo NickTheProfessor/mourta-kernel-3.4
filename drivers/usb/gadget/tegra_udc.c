@@ -41,6 +41,7 @@
 #include <linux/pm_qos.h>
 #include <linux/platform_data/tegra_usb.h>
 #include <linux/timer.h>
+#include <linux/tegra-soc.h>
 
 #include <asm/byteorder.h>
 #include <asm/io.h>

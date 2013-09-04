@@ -20,6 +20,7 @@
 #include <mach/iomap.h>
 #include <mach/tegra_fuse.h>
 #include <mach/hardware.h>
+#include <linux/tegra-soc.h>
 #include <linux/sysfs.h>
 #include <linux/kobject.h>
 #include <linux/platform_device.h>

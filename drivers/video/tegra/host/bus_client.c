@@ -29,6 +29,7 @@
 #include <linux/hrtimer.h>
 #include <linux/export.h>
 #include <linux/firmware.h>
+#include <linux/tegra-soc.h>
 
 #include <trace/events/nvhost.h>
 
@@ -39,7 +40,6 @@
 #include <linux/nvhost_ioctl.h>
 
 #include <mach/gpufuse.h>
-#include <mach/hardware.h>
 #include <mach/iomap.h>
 
 #include "debug.h"

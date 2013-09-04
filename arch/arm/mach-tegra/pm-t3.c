@@ -28,6 +28,7 @@
 #include <linux/module.h>
 #include <linux/clockchips.h>
 #include <linux/cpu_pm.h>
+#include <linux/tegra-soc.h>
 
 #include <mach/iomap.h>
 #include <mach/irqs.h>

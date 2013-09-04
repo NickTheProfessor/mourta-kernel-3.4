@@ -45,6 +45,7 @@
 #include <linux/pm_qos.h>
 #include <linux/export.h>
 #include <linux/tegra_audio.h>
+#include <linux/tegra-soc.h>
 
 #include <trace/events/power.h>
 #include <trace/events/nvsecurity.h>
@@ -63,7 +64,6 @@
 #include <mach/iomap.h>
 #include <mach/irqs.h>
 #include <mach/powergate.h>
-#include <mach/hardware.h>
 
 #include "board.h"
 #include "clock.h"

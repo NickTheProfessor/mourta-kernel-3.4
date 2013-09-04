@@ -24,6 +24,7 @@
 #include <linux/of.h>
 #include <linux/delay.h>
 #include <linux/of_gpio.h>
+#include <linux/tegra-soc.h>
 
 #include <mach/usb_phy.h>
 #include <mach/iomap.h>

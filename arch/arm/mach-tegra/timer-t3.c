@@ -32,6 +32,7 @@
 #include <linux/syscore_ops.h>
 #include <linux/cpu.h>
 #include <linux/export.h>
+#include <linux/tegra-soc.h>
 
 #include <asm/mach/time.h>
 #include <asm/localtimer.h>
@@ -40,7 +41,6 @@
 
 #include <mach/iomap.h>
 #include <mach/irqs.h>
-#include <mach/hardware.h>
 
 #include "board.h"
 #include "clock.h"

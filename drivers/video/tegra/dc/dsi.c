@@ -31,6 +31,7 @@
 #include <linux/nvhost.h>
 #include <linux/lcm.h>
 #include <linux/regulator/consumer.h>
+#include <linux/tegra-soc.h>
 
 #include <mach/clk.h>
 #include <mach/dc.h>

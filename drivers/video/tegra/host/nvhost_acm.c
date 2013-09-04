@@ -28,11 +28,11 @@
 #include <linux/platform_device.h>
 #include <linux/pm.h>
 #include <linux/pm_runtime.h>
+#include <linux/tegra-soc.h>
 #include <trace/events/nvhost.h>
 
 #include <mach/powergate.h>
 #include <mach/clk.h>
-#include <mach/hardware.h>
 #include <mach/mc.h>
 
 #include "nvhost_acm.h"

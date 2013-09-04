@@ -31,8 +31,8 @@
 #include <linux/sysfs.h>
 #include <linux/printk.h>
 #include <linux/clk.h>
+#include <linux/tegra-soc.h>
 #include <asm/processor.h>
-#include <mach/hardware.h>
 #include <mach/isomgr.h>
 #include <mach/mc.h>
 

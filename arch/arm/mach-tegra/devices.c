@@ -28,6 +28,7 @@
 #include <linux/tegra_avp.h>
 #include <linux/nvhost.h>
 #include <linux/clk.h>
+#include <linux/tegra-soc.h>
 #include <asm/pmu.h>
 #include <mach/irqs.h>
 #include <mach/iomap.h>

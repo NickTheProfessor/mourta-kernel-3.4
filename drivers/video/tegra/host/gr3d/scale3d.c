@@ -36,8 +36,7 @@
 #include <linux/ftrace.h>
 #include <linux/platform_data/tegra_edp.h>
 #include <linux/devfreq.h>
-
-#include <mach/hardware.h>
+#include <linux/tegra-soc.h>
 
 #include <governor.h>
 

@@ -29,6 +29,7 @@
 #include <linux/module.h>
 #include <linux/delay.h>
 #include <linux/syscore_ops.h>
+#include <linux/tegra-soc.h>
 #include <linux/irqdomain.h>
 
 #include <asm/mach/irq.h>
