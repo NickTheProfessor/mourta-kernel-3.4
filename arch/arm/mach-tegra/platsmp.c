@@ -21,6 +21,7 @@
 #include <linux/delay.h>
 #include <linux/clk.h>
 #include <linux/cpumask.h>
+#include <linux/tegra-timer.h>
 
 #include <asm/cputype.h>
 #include <asm/hardware/gic.h>
@@ -28,7 +29,6 @@
 #include <asm/smp_plat.h>
 #include <asm/smp_scu.h>
 #include <asm/soc.h>
-#include "timer.h"
 
 #include <mach/clk.h>
 #include <mach/iomap.h>

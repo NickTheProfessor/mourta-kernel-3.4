@@ -33,6 +33,8 @@
 #include <linux/cpu.h>
 #include <linux/export.h>
 #include <linux/tegra-soc.h>
+#include <linux/tegra-timer.h>
+#include <linux/tegra-cpuidle.h>
 
 #include <asm/mach/time.h>
 #include <asm/localtimer.h>
@@ -44,8 +46,6 @@
 
 #include "board.h"
 #include "clock.h"
-#include "cpuidle.h"
-#include "timer.h"
 #include "fuse.h"
 
 #define TEST_LP2_WAKE_TIMERS	0

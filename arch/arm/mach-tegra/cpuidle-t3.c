@@ -55,14 +55,14 @@
 #include <trace/events/power.h>
 
 #include "clock.h"
-#include "cpuidle.h"
+#include <linux/tegra-cpuidle.h>
 #include "dvfs.h"
 #include "fuse.h"
 #include "gic.h"
 #include "pm.h"
 #include "reset.h"
 #include "sleep.h"
-#include "timer.h"
+#include <linux/tegra-timer.h>
 #include "fuse.h"
 
 #define CLK_RST_CONTROLLER_CPU_CMPLX_STATUS \

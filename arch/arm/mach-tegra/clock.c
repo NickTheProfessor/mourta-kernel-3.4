@@ -34,6 +34,7 @@
 #include <linux/bug.h>
 #include <linux/tegra-soc.h>
 #include <trace/events/power.h>
+#include <linux/tegra-timer.h>
 
 #include <mach/clk.h>
 #include <mach/iomap.h>
@@ -43,7 +44,6 @@
 #include "board.h"
 #include "clock.h"
 #include "dvfs.h"
-#include "timer.h"
 #include "cpu-tegra.h"
 
 #define DISABLE_BOOT_CLOCKS 1

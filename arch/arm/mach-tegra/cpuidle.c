@@ -39,16 +39,16 @@
 #include <linux/cpu_pm.h>
 #include <linux/module.h>
 #include <linux/hrtimer.h>
+#include <linux/tegra-timer.h>
+#include <linux/tegra-cpuidle.h>
 
 #include <mach/iomap.h>
 #include <mach/irqs.h>
 
 #include <trace/events/nvpower.h>
 
-#include "cpuidle.h"
 #include "pm.h"
 #include "sleep.h"
-#include "timer.h"
 
 int tegra_pg_exit_latency;
 static int tegra_pd_power_off_time;

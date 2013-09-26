@@ -41,6 +41,8 @@
 #include <linux/cpu_pm.h>
 #include <linux/module.h>
 #include <linux/tegra-soc.h>
+#include <linux/tegra-timer.h>
+#include <linux/tegra-cpuidle.h>
 
 #include <asm/cacheflush.h>
 #include <asm/hardware/gic.h>
@@ -55,14 +57,12 @@
 #include <trace/events/power.h>
 
 #include "clock.h"
-#include "cpuidle.h"
 #include "dvfs.h"
 #include "fuse.h"
 #include "gic.h"
 #include "pm.h"
 #include "reset.h"
 #include "sleep.h"
-#include "timer.h"
 #include "fuse.h"
 
 #define CLK_RST_CONTROLLER_CPU_CMPLX_STATUS \

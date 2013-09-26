@@ -29,6 +29,7 @@
 #include <linux/clockchips.h>
 #include <linux/cpu_pm.h>
 #include <linux/tegra-soc.h>
+#include <linux/tegra-cpuidle.h>
 
 #include <mach/iomap.h>
 #include <mach/irqs.h>
@@ -40,7 +41,6 @@
 #include <asm/hardware/gic.h>
 
 #include "clock.h"
-#include "cpuidle.h"
 #include "pm.h"
 #include "sleep.h"
 #include "tegra3_emc.h"

@@ -33,6 +33,7 @@
 #include <linux/of.h>
 #include <linux/rtc.h>
 #include <asm/localtimer.h>
+#include <linux/tegra-timer.h>
 
 #include <asm/mach/time.h>
 #include <asm/delay.h>
@@ -44,7 +45,6 @@
 
 #include "board.h"
 #include "clock.h"
-#include "timer.h"
 #include "fuse.h"
 
 static void __iomem *timer_reg_base = IO_ADDRESS(TEGRA_TMR1_BASE);

@@ -46,6 +46,8 @@
 #include <linux/export.h>
 #include <linux/tegra_audio.h>
 #include <linux/tegra-soc.h>
+#include <linux/tegra-timer.h>
+#include <linux/tegra-cpuidle.h>
 
 #include <trace/events/power.h>
 #include <trace/events/nvsecurity.h>
@@ -68,14 +70,12 @@
 #include "board.h"
 #include "clock.h"
 #include "common.h"
-#include "cpuidle.h"
 #include "fuse.h"
 #include "gic.h"
 #include "pm.h"
 #include "pm-irq.h"
 #include "reset.h"
 #include "sleep.h"
-#include "timer.h"
 #include "dvfs.h"
 #include "cpu-tegra.h"
 
