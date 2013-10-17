@@ -5,7 +5,7 @@
  * Author:
  *	Colin Cross <ccross@google.com>
  *
- * Copyright (c) 2019-2013, NVIDIA CORPORATION.  All rights reserved.
+ * Copyright (c) 2012-2013, NVIDIA CORPORATION.  All rights reserved.
  *
  * This software is licensed under the terms of the GNU General Public
  * License version 2, as published by the Free Software Foundation, and
@@ -44,6 +44,7 @@
 #include "clock.h"
 #include "dvfs.h"
 #include "timer.h"
+#include "cpu-tegra.h"
 
 #define DISABLE_BOOT_CLOCKS 1
 
@@ -1000,7 +1001,7 @@ static int __init tegra_clk_late_init(void)
 	if (!tegra_dvfs_late_init())
 		tegra_dfll_cpu_start();	/* after successful dvfs init only */
 	tegra_sync_cpu_clock();		/* after attempt to get dfll ready */
-	tegra_recalculate_cpu_edp_limits();
+	tegra_update_cpu_edp_limits();
 	return 0;
 }
 late_initcall(tegra_clk_late_init);

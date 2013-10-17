@@ -87,8 +87,13 @@ struct thermal_cooling_device *edp_cooling_device_create(void *v);
 void tegra_init_cpu_edp_limits(unsigned int regulator_mA);
 void tegra_recalculate_cpu_edp_limits(void);
 void tegra_init_system_edp_limits(unsigned int power_limit_mW);
-void tegra_get_cpu_edp_limits(const struct tegra_edp_limits **limits, int *size);
+void tegra_get_cpu_edp_limits(const struct tegra_edp_limits **limits,
+			      int *size);
 unsigned int tegra_get_edp_limit(int *get_edp_thermal_index);
+void tegra_init_cpu_reg_mode_limits(unsigned int regulator_ma,
+				    unsigned int mode);
+void tegra_get_cpu_reg_mode_limits(const struct tegra_edp_limits **limits,
+				   int *size, unsigned int mode);
 void tegra_get_system_edp_limits(const unsigned int **limits);
 int tegra_system_edp_alarm(bool alarm);
 unsigned int tegra_edp_find_maxf(int volt);
@@ -107,6 +112,12 @@ static inline void tegra_init_system_edp_limits(int power_limit_mW)
 {}
 static inline void tegra_get_cpu_edp_limits(struct tegra_edp_limits **limits,
 					    int *size)
+{}
+static inline void tegra_init_cpu_reg_mode_limits(unsigned int regulator_mA,
+						  unsigned int mode)
+{}
+static inline void tegra_get_cpu_reg_mode_limits(
+	const struct tegra_edp_limits **limits, int *size, unsigned int mode)
 {}
 static inline unsigned int tegra_get_edp_limit(int *get_edp_thermal_index)
 { return -1; }
