@@ -438,7 +438,7 @@ const int gpio_to_pingroup[TEGRA_MAX_GPIO + 1] = {
 		.slew_falling = TEGRA_SLEW_##_pullup_slew,	\
 	}
 
-static __devinitdata struct tegra_drive_pingroup_config t30_def_drive_pinmux[] = {
+static __initdata struct tegra_drive_pingroup_config t30_def_drive_pinmux[] = {
 	SET_DRIVE(DAP2, DISABLE, ENABLE, DIV_1, 31, 31, FASTEST, FASTEST),
 	SET_DRIVE(DAP1, DISABLE, ENABLE, DIV_1, 31, 31, FASTEST, FASTEST),
 };
@@ -503,7 +503,7 @@ void __devinit tegra30_pinmux_init(const struct tegra_pingroup_desc **pg,
 #endif
 }
 
-void __devinit tegra30_default_pinmux(void)
+void tegra30_default_pinmux(void)
 {
 	tegra_drive_pinmux_config_table(t30_def_drive_pinmux,
 					ARRAY_SIZE(t30_def_drive_pinmux));

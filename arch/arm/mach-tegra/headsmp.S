@@ -116,8 +116,18 @@ ENTRY(tegra_resume)
 
 #ifdef CONFIG_TRUSTED_FOUNDATIONS
 #ifndef CONFIG_ARCH_TEGRA_11x_SOC
-	mov	r0, #0x00000003
+	mov32	r1, TEGRA_TMRUS_BASE
+	ldr	r0, [r1]
+	adr	r1, tegra_resume_smc_entry_time
+	str	r0, [r1]
+
+	/* wake up (should have specified args?) */
 	bl	tegra_generic_smc_local
+
+	mov32	r1, TEGRA_TMRUS_BASE
+	ldr	r0, [r1]
+	adr	r1, tegra_resume_smc_exit_time
+	str	r0, [r1]
 #endif
 #endif
 	b	cpu_resume
@@ -190,7 +200,8 @@ __invalidate_cpu_state:
 	orr	r0, r0, #0x80			@ hazard detection timeout
 	mcr	p15, 0x1, r0, c15, c0, 0
 __enable_i_cache_branch_pred:
-	mov	r0, #0x1800
+	mrc	p15, 0, r0, c1, c0, 0
+	orr	r0, r0, #0x1800
 	mcr	p15, 0, r0, c1, c0, 0	@ enable branch prediction, i-cache
 	mov	pc, lr
 	/* no fall through, just return to the caller */
