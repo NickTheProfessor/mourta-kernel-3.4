@@ -1,7 +1,7 @@
 /*
  * drivers/misc/cpuload.c
  *
- * Copyright (c) 2012-2014, NVIDIA CORPORATION.  All rights reserved.
+ * Copyright (c) 2013, NVIDIA CORPORATION.  All rights reserved.
  *
  * This software is licensed under the terms of the GNU General Public
  * License version 2, as published by the Free Software Foundation, and
@@ -45,13 +45,11 @@ struct cpuloadmon_cpuinfo {
 	int monitor_enabled;
 	int cpu_load;
 
-#ifdef CONFIG_TEGRA_CPUQUIET
 	/* runnable threads */
 	u64 previous_integral;
 	unsigned int avg;
 	bool integral_sampled;
 	u64 prev_timestamp;
-#endif
 };
 
 static DEFINE_PER_CPU(struct cpuloadmon_cpuinfo, cpuinfo);
@@ -65,12 +63,10 @@ static unsigned long io_is_busy;
 #define DEFAULT_TIMER_RATE 20000;
 static unsigned long timer_rate;
 
-#ifdef CONFIG_TEGRA_CPUQUIET
 /* nr runnable threads */
 #define NR_FSHIFT_EXP	3
 #define NR_FSHIFT	(1 << NR_FSHIFT_EXP)
 #define EXP    1497 /* 20 msec window */
-#endif
 
 static inline cputime64_t get_cpu_iowait_time(
 	unsigned int cpu, cputime64_t *wall)
@@ -95,9 +91,8 @@ static void cpuloadmon_timer(unsigned long data)
 		&per_cpu(cpuinfo, data);
 	u64 now_idle;
 	u64 now_iowait;
-#ifdef CONFIG_TEGRA_CPUQUIET
 	u64 integral, old_integral, delta_integral, delta_time_nr, cur_time;
-#endif
+
 	smp_rmb();
 
 	if (!pcpu->monitor_enabled)
@@ -141,7 +136,6 @@ static void cpuloadmon_timer(unsigned long data)
 	else
 		pcpu->cpu_load = 100 * (delta_time - delta_idle) / delta_time;
 
-#ifdef CONFIG_TEGRA_CPUQUIET
 	/* get avg nr runnables */
 	integral = nr_running_integral(data);
 	old_integral = pcpu->previous_integral;
@@ -167,7 +161,7 @@ static void cpuloadmon_timer(unsigned long data)
 		do_div(delta_integral, delta_time_nr);
 		pcpu->avg = delta_integral;
 	}
-#endif
+
 rearm:
 	if (!timer_pending(&pcpu->cpu_timer)) {
 		if (pcpu->idling)
@@ -310,32 +304,6 @@ static ssize_t show_cpu_load(struct kobject *kobj,
 static struct global_attr cpu_load_attr = __ATTR(cpu_load, 0444,
 		show_cpu_load, NULL);
 
-static ssize_t show_cpu_usage(struct kobject *kobj,
-		struct attribute *attr, char *buf)
-{
-	unsigned int t, len, total;
-	const cpumask_t *cpus = cpu_online_mask;
-	struct cpuloadmon_cpuinfo *pcpu;
-
-	total = 0;
-
-	for_each_cpu_mask(t, *cpus) {
-		pcpu = &per_cpu(cpuinfo, t);
-		len = sprintf(buf, "%u %u %llu %llu %llu\n",
-			      t, pcpu->avg,
-			      ktime_to_us(ktime_get()),
-			      get_cpu_idle_time_us(t, NULL),
-			      get_cpu_iowait_time_us(t, NULL));
-		total += len;
-		buf = &buf[len];
-	}
-
-	return total;
-}
-
-static struct global_attr cpu_usage_attr = __ATTR(cpu_usage, 0444,
-		show_cpu_usage, NULL);
-
 static ssize_t show_enable(struct kobject *kobj,
 		struct attribute *attr, char *buf)
 {
@@ -352,7 +320,7 @@ static ssize_t store_enable(struct kobject *kobj,
 	ret = kstrtoul(buf, 0, &val);
 	if (ret < 0)
 		return ret;
-	enabled = !!val;	/* normalize user input */
+	enabled = val;
 	if (before != enabled)
 			cpuloadmon_enable(enabled);
 
@@ -370,7 +338,6 @@ static struct attribute *cpuload_attributes[] = {
 	&timer_rate_attr.attr,
 	&cpus_online_attr.attr,
 	&cpu_load_attr.attr,
-	&cpu_usage_attr.attr,
 	&enable_attr.attr,
 	NULL,
 };
