@@ -599,6 +599,7 @@ static struct tegra_dc_out x3_disp1_out = {
 	.type		= TEGRA_DC_OUT_RGB,
 	.parent_clk 	= "pll_p",//"pll_d_out0",
 	//.depth		= 24,
+	.dither		= TEGRA_DC_ERRDIFF_DITHER,
 
 	.modes	 	= x3_panel_modes,
 	.n_modes 	= ARRAY_SIZE(x3_panel_modes),
