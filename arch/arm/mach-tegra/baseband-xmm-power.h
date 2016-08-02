@@ -33,6 +33,9 @@ extern unsigned long modem_ver;
 extern unsigned long modem_flash;
 extern unsigned long modem_pm;
 
+extern bool enum_success;
+extern bool x3_hddisplay_on;
+
 enum baseband_type {
 	BASEBAND_XMM,
 };
@@ -71,11 +74,6 @@ enum baseband_xmm_power_work_state_t {
 	BBXMM_WORK_INIT_FLASH_STEP1,
 	/* initialize flash (with power management support) modem */
 	BBXMM_WORK_INIT_FLASH_PM_STEP1,
-	/* initialize flashless (with power management support) modem */
-	BBXMM_WORK_INIT_FLASHLESS_PM_STEP1,
-	BBXMM_WORK_INIT_FLASHLESS_PM_STEP2,
-	BBXMM_WORK_INIT_FLASHLESS_PM_STEP3,
-	BBXMM_WORK_INIT_FLASHLESS_PM_STEP4,
 };
 
 struct xmm_power_data {

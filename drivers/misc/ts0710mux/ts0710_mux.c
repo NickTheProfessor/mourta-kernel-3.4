@@ -108,7 +108,7 @@ this mux driver is not able to acquire the sema but wont schedule as its not set
 #define ENABLE_MUX_WAKE_LOCK
 #ifdef ENABLE_MUX_WAKE_LOCK
 #include <linux/wakelock.h>
-#define MUX_WAKELOCK_TIME	(20*HZ)
+#define MUX_WAKELOCK_TIME	(40*HZ)
 struct wake_lock	 	s_wake_lock;
 #endif //ENABLE_MUX_WAKE_LOCK
 
@@ -345,6 +345,9 @@ static int node_put_to_send(u8 dlci, u8 *data, int size)
     u8 priority;
     int frame_count = 0;
     int dont_wait = 0;
+#ifdef TS0710DEBUG
+    unsigned int smp_id = smp_processor_id();
+#endif
 
 	TS0710_DEBUG("start!");
 
@@ -354,9 +357,6 @@ static int node_put_to_send(u8 dlci, u8 *data, int size)
 		kfree(data);
 		return size;
 	}
-#endif
-#ifdef TS0710DEBUG
-    unsigned int smp_id = smp_processor_id();
 #endif
 
     dont_wait = (in_interrupt() || ((mux_filp[dlci] != NULL) && (mux_filp[dlci]->f_flags & O_NONBLOCK)));
@@ -804,7 +804,8 @@ void process_mcc(u8 * data, u32 len, ts0710_con * ts0710, int longpkt)
 		{
 			ts0710->dlci[j].state = CONNECTED;
 			up(&spi_write_data_sema[j]);
-				(void)down_trylock(&spi_write_data_sema[j]);
+				if (down_trylock(&spi_write_data_sema[j]))
+					TS0710_PRINTK("spi_write_data_sema cannot be acquired.\n");
 		}
      		ts0710_fcon_msg(ts0710, MCC_RSP);
      	}
@@ -851,7 +852,8 @@ void process_mcc(u8 * data, u32 len, ts0710_con * ts0710, int longpkt)
 				ts0710->dlci[dlci].state = CONNECTED;
 				TS0710_DEBUG ("MUX Received Flow on on dlci %d\n", dlci);
 				up(&spi_write_data_sema[dlci]);
-				(void)down_trylock(&spi_write_data_sema[dlci]);
+				if (down_trylock(&spi_write_data_sema[dlci]))
+					TS0710_PRINTK("spi_write_data_sema cannot be acquired.\n");
 			}
 
      			ts0710_msc_msg(ts0710, v24_sigs, MCC_RSP, dlci);
@@ -2230,17 +2232,25 @@ static void ts_ldisc_clear_nodes(void)
     spin_unlock_irqrestore(&frame_nodes_lock, lock_flag);
 }
 
+/*There is no need to wait forever for sema down
+ *Add a timeout module for testing
+ */
+unsigned long looper_timeout = 50;  // 500ms
+module_param(looper_timeout, ulong, 0664);
+MODULE_PARM_DESC(looper_timeout,
+        "ts0710 mux - tx_looper semaphore down timeout");
+
 static int ts_ldisc_tx_looper(void *param)
 {
-    int i,res;
-    u8  dlci;		
+    int i, res;
+    u8  dlci;
     u8 *data_ptr;
     int data_size;
     void * next_ptr;
     int is_frames = 0;
     short int retry_cnt = 0;
     short int retry_max = 0;
-//    unsigned int smp_id = smp_processor_id();
+
     TS0710_DEBUG(" start");
     
     set_freezable(); //20120312 - Nv_bug_946018 recommend code to fix schedule is
@@ -2302,7 +2312,7 @@ static int ts_ldisc_tx_looper(void *param)
     					if(res == -1) // spi suspend MAX time 1second
     						retry_max = 10;
     					else // spi SRDY wait error : 500ms + (200 ms+500ms) * 2
-    						retry_max = 2;
+    						retry_max = 4;
 						
     				//	TS0710_PRINTK("1st error send to dlci=%d,res : %d,count : %d, data : %s",i,res,data_size,data_ptr);
     					retry_cnt= 0;
@@ -2344,10 +2354,11 @@ static int ts_ldisc_tx_looper(void *param)
             up(&spi_write_sema);
         }
 
-        try_to_freeze();
-        TS0710_DEBUG("spi_write_sema: down");
-        down_timeout(&spi_write_sema, TS0710MUX_TIME_OUT);
+        if (!is_frames)
+            try_to_freeze();
         
+        if (!down_timeout(&spi_write_sema, looper_timeout))
+            TS0710_DEBUG("spi_write_sema: down");
     }
 
     while(!kthread_should_stop())
@@ -2355,7 +2366,7 @@ static int ts_ldisc_tx_looper(void *param)
         msleep(1);
     }
 
-	TS0710_DEBUG(" exit\n");
+    TS0710_DEBUG(" exit\n");
 
     return 0;
 }
@@ -2366,7 +2377,6 @@ int is_cp_crash = 0;    //cpwatcher
 
 #ifdef LGE_ENABLE_RIL_RECOVERY_MODE
 static struct input_dev *recovery_dev;
-extern bool enum_success; //baseband-xmm-power.c
 unsigned long ril_recovery_cnt = 0;
 module_param(ril_recovery_cnt, ulong, 0644);
 MODULE_PARM_DESC(ril_recovery_cnt,
@@ -2424,8 +2434,9 @@ static int ts_ldisc_open(struct tty_struct *tty)
     write_task = NULL;
     write_task = kthread_run(ts_ldisc_tx_looper,NULL,"%s","ts_ldisc_tx_looper");
 
-    if(write_task == NULL) {
+    if (write_task == NULL) {
         TS0710_PRINTK(" write_task is not started!!!\n");
+        return -EAGAIN;
     }
 #endif
     TS0710_PRINTK(" ts_ldisc_open executed\n");
@@ -2446,9 +2457,9 @@ static void ts_ldisc_close(struct tty_struct *tty)
         ts_ldisc_close_is_called = 1; //true
 #endif
     	up(&spi_write_sema); // if write semaphore holds on the thread, release it [START]
-    	TS0710_DEBUG("spi_write_sema(up) is release!!!");
+	TS0710_DEBUG("spi_write_sema(up) is release!!!");
     	kthread_stop(write_task);
-        TS0710_DEBUG("write thread is stopped");    
+        TS0710_DEBUG("write thread is stopped");
     }
 	
 //20110517 ws.yang@lge.com ..add to ril recovery [S]
@@ -2467,10 +2478,7 @@ static void ts_ldisc_close(struct tty_struct *tty)
 	printk(KERN_ERR "\n* Restart USB-HSIC Modem               *\n");
 	printk(KERN_ERR "******************************* \n");
 	printk(KERN_ERR"### CP Crash : %d, USB DISCONNECT : %d ###\n",is_cp_crash, is_usb_disconnect);
-	
-	if (is_cp_crash == 1)
-		is_usb_disconnect = 0;
-	
+
 	if (tty->disc_data) {
 		TS0710_DEBUG("tty->disc_data = 0x%p\n", tty->disc_data);
 		kfree(tty->disc_data);
@@ -2478,18 +2486,12 @@ static void ts_ldisc_close(struct tty_struct *tty)
 	}
 
 #ifdef LGE_ENABLE_RIL_RECOVERY_MODE
-	//TODO is there a better way to wake ril?
-	input_report_key(recovery_dev, KEY_POWER, 1);
-	input_report_key(recovery_dev, KEY_POWER, 0);
-	input_sync(recovery_dev);
-	TS0710_PRINTK("Input power_key sendt to wake RIL");
-
 	//reset baseband_xmm
 	baseband_xmm_power_switch(0);
 	mdelay(600); //TODO wait longer or until lge-ril-recovery starts ??
 	baseband_xmm_power_switch(1);
 
-	// wait for enum_sucess for 8sec before setting ts_ldisc_close_is_called
+	// wait for enum_sucess for 0,5x16sec before setting ts_ldisc_close_is_called to 0
 	if (!enum_success) {
 		do {
 			TS0710_DEBUG("wait for modem emulation");
@@ -2500,9 +2502,21 @@ static void ts_ldisc_close(struct tty_struct *tty)
 			TS0710_PRINTK("Giving up waiting for modem");
 	}
 
-	ts_ldisc_close_is_called = 0;
-	if (is_cp_crash == 1)
+	//TODO is there a better way to wake ril?
+	//Only send power_key when screen is off
+	if (!x3_hddisplay_on) {
+		mdelay(500);
+		input_report_key(recovery_dev, KEY_POWER, 1);
+		input_report_key(recovery_dev, KEY_POWER, 0);
+		input_sync(recovery_dev);
+		TS0710_PRINTK("Input power_key sendt to wake RIL");
+	}
+
+	if ((is_cp_crash == 1) || (is_usb_disconnect == 1)) {
 		is_cp_crash = 0;
+		is_usb_disconnect = 0;
+	}
+	ts_ldisc_close_is_called = 0;
 
 	ril_recovery_cnt++;
 	TS0710_PRINTK("### ril_recovery_cnt = %lu ###\n", ril_recovery_cnt);
@@ -2579,7 +2593,7 @@ static u8 iscmdtty_gen2[ 23 ] =
 static int __init mux_init(void)
 {
      u8 j;
-     int result;
+     int result, error;
 #ifdef CONFIG_LGE_KERNEL_MUX
      NR_MUXS = TS0710MAX_CHANNELS;
      iscmdtty = NULL;
@@ -2661,7 +2675,6 @@ static int __init mux_init(void)
   
 #ifdef LGE_ENABLE_RIL_RECOVERY_MODE
      /*input device*/
-     int error;
 
      recovery_dev = input_allocate_device();
      if (!recovery_dev) {
@@ -2669,6 +2682,7 @@ static int __init mux_init(void)
      	goto err_free_dev;
      }
 
+     recovery_dev->name = "TS07.10_Recovery";
      recovery_dev->evbit[0] = BIT_MASK(EV_KEY);
      recovery_dev->keybit[BIT_WORD(KEY_POWER)] = BIT_MASK(KEY_POWER);
 
