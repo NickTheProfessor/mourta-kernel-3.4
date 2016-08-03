@@ -131,8 +131,8 @@ struct nvhost_device_data t30_gr3d_info = {
 	.moduleid	= NVHOST_MODULE_NONE,
 	.finalize_poweron = NULL,
 
-+	.busy		= nvhost_scale_notify_busy,
-+	.idle		= nvhost_scale_notify_idle,
+	.busy		= nvhost_scale_notify_busy,
+	.idle		= nvhost_scale_notify_idle,
 	.suspend_ndev	= nvhost_scale3d_suspend,
 	.init		= NULL,
 	.deinit		= NULL,
