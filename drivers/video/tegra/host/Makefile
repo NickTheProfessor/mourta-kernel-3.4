@@ -13,8 +13,7 @@ nvhost-objs = \
 	bus_client.o \
 	chip_support.o \
 	nvhost_memmgr.o \
-	nvhost_scale.o \
-	user_hwctx.o
+	nvhost_scale.o
 
 obj-$(CONFIG_TEGRA_GRHOST) += mpe/
 obj-$(CONFIG_TEGRA_GRHOST) += gr3d/
