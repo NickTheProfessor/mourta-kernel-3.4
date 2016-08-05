@@ -162,12 +162,6 @@ static void hp_stats_update(unsigned int cpu, bool up)
 	mutex_unlock(&tegra_cpq_lock_stats);
 }
 
-#ifdef CONFIG_MACH_X3
-/* Use display state to try and save some power. From earlysuspend.c */
-extern bool wants_display_on;
-#endif
-
-
 static int update_core_config(unsigned int cpunumber, bool up)
 {
 	int ret = 0;
@@ -494,8 +488,7 @@ void tegra_auto_hotplug_governor(unsigned int cpu_freq, bool suspend)
 
 	if (suspend) {
 		/* Switch to fast cluster if suspend rate is high enough */
-		if (cpu_freq >= idle_bottom_freq
-			 && (!screen_off_lp || wants_display_on)) {
+		if (cpu_freq >= idle_bottom_freq {
 
 			/* Force switch now */
 			cpq_target_cluster_state = TEGRA_CPQ_G;
@@ -513,8 +506,7 @@ void tegra_auto_hotplug_governor(unsigned int cpu_freq, bool suspend)
 
 	if (is_lp_cluster()) {
 		if (cpu_freq >= idle_top_freq &&
-			cpq_target_cluster_state != TEGRA_CPQ_G
-					&& (!screen_off_lp || wants_display_on)) {
+			cpq_target_cluster_state != TEGRA_CPQ_G {
 
 
 			/* Switch to fast cluster after up_delay */
