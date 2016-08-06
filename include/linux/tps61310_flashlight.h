@@ -19,7 +19,6 @@
 
 #ifndef __TPS61310_FLASHLIGHT_H
 #define __TPS61310_FLASHLIGHT_H
-#include <linux/earlysuspend.h>
 
 #define FLASHLIGHT_NAME "flashlight"
 

@@ -33,9 +33,6 @@
 #include <linux/debugfs.h>
 #include <linux/delay.h>
 #include <linux/suspend.h>
-#ifdef CONFIG_HAS_EARLYSUSPEND
-#include <linux/earlysuspend.h>
-#endif
 #include <linux/slab.h>
 #include <linux/serial_reg.h>
 #include <linux/seq_file.h>
@@ -127,17 +124,6 @@ static u64 resume_time;
 static u64 resume_entry_time;
 static u64 suspend_time;
 static u64 suspend_entry_time;
-#ifdef CONFIG_HAS_EARLYSUSPEND
-/*
- * SCLK_ADJUST_DELAY is timeout to delay lowering SCLK
- * after display off/suspend. SCLK is kept at 40Mhz for the specified
- * timeout period. This is done to solve audio glitch as it was
- * found that dropping SCLK at 12Mhz doesn't provive enough bandwidth.
- */
-#define SCLK_ADJUST_DELAY 20000
-static struct	delayed_work delayed_adjust;
-DEFINE_MUTEX(early_suspend_lock);
-#endif
 #endif
 
 struct suspend_context tegra_sctx;
@@ -1671,49 +1657,3 @@ static int tegra_debug_uart_syscore_init(void)
 	return 0;
 }
 arch_initcall(tegra_debug_uart_syscore_init);
-
-#ifdef CONFIG_HAS_EARLYSUSPEND
-static struct clk *clk_wake;
-static void delayed_adjusting_work(struct work_struct *work)
-{
-	mutex_lock(&early_suspend_lock);
-	if (clk_wake)
-		clk_disable(clk_wake);
-	mutex_unlock(&early_suspend_lock);
-}
-
-static void pm_early_suspend(struct early_suspend *h)
-{
-	mutex_lock(&early_suspend_lock);
-	schedule_delayed_work(&delayed_adjust, msecs_to_jiffies(SCLK_ADJUST_DELAY));
-//	pm_qos_update_request(&awake_cpu_freq_req, PM_QOS_DEFAULT_VALUE);
-	mutex_unlock(&early_suspend_lock);
-}
-
-static void pm_late_resume(struct early_suspend *h)
-{
-	mutex_lock(&early_suspend_lock);
-	if (clk_wake && (clk_wake->refcnt >= 1))
-		clk_disable(clk_wake);
-	cancel_delayed_work(&delayed_adjust);
-	if (clk_wake)
-		clk_enable(clk_wake);
-//	pm_qos_update_request(&awake_cpu_freq_req, (s32)AWAKE_CPU_FREQ_MIN);
-	mutex_unlock(&early_suspend_lock);
-}
-
-static struct early_suspend pm_early_suspender = {
-		.suspend = pm_early_suspend,
-		.resume = pm_late_resume,
-};
-
-static int pm_init_wake_behavior(void)
-{
-	clk_wake = tegra_get_clock_by_name("wake.sclk");
-	register_early_suspend(&pm_early_suspender);
-	INIT_DELAYED_WORK(&delayed_adjust, delayed_adjusting_work);
-	return 0;
-}
-
-late_initcall(pm_init_wake_behavior);
-#endif

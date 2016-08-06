@@ -3,7 +3,7 @@
  *
  * Cpuquiet driver for Tegra CPUs
  *
- * Copyright (c) 2012-2014, NVIDIA CORPORATION.  All rights reserved.
+ * Copyright (c) 2012-2013 NVIDIA CORPORATION.  All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -65,7 +65,6 @@ static wait_queue_head_t wait_cpu;
  * Settings will be enforced directly upon write to no_lp
  */
 static int no_lp;
-static bool screen_off_lp;
 static bool enable;
 static unsigned long up_delay;
 static unsigned long down_delay;
@@ -488,7 +487,7 @@ void tegra_auto_hotplug_governor(unsigned int cpu_freq, bool suspend)
 
 	if (suspend) {
 		/* Switch to fast cluster if suspend rate is high enough */
-		if (cpu_freq >= idle_bottom_freq {
+		if (cpu_freq >= idle_bottom_freq) {
 
 			/* Force switch now */
 			cpq_target_cluster_state = TEGRA_CPQ_G;
@@ -506,8 +505,7 @@ void tegra_auto_hotplug_governor(unsigned int cpu_freq, bool suspend)
 
 	if (is_lp_cluster()) {
 		if (cpu_freq >= idle_top_freq &&
-			cpq_target_cluster_state != TEGRA_CPQ_G {
-
+			cpq_target_cluster_state != TEGRA_CPQ_G) {
 
 			/* Switch to fast cluster after up_delay */
 			cpq_target_cluster_state = TEGRA_CPQ_G;
@@ -629,7 +627,6 @@ CPQ_ATTRIBUTE(up_delay, 0644, ulong, delay_callback);
 CPQ_ATTRIBUTE(down_delay, 0644, ulong, delay_callback);
 CPQ_ATTRIBUTE(hotplug_timeout, 0644, ulong, delay_callback);
 CPQ_ATTRIBUTE(enable, 0644, bool, enable_callback);
-CPQ_BASIC_ATTRIBUTE(screen_off_lp, 0644, bool);
 
 static struct attribute *tegra_auto_attributes[] = {
 	&no_lp_attr.attr,
@@ -640,7 +637,6 @@ static struct attribute *tegra_auto_attributes[] = {
 	&mp_overhead_attr.attr,
 	&enable_attr.attr,
 	&hotplug_timeout_attr.attr,
-	&screen_off_lp_attr.attr,
 	NULL,
 };
 

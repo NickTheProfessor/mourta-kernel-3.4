@@ -623,15 +623,8 @@ config TEGRA_SE_ON_CBUS
 	  This option enables SE clock to be derived from cbus
 
 config TEGRA_CBUS_CLOCK_DIVIDER
-        int "CBUS clock divider"
-        default "2"
-
-config TEGRA_CONVSERVATIVE_GOV_ON_EARLYSUPSEND
-	bool "Use conservative cpu frequency governor when device enters early suspend"
-	depends on HAS_EARLYSUSPEND && CPU_FREQ
-	default n
-	help
-	 Also will restore to original cpu frequency governor when device is resumed
+	int "CBUS clock divider"
+	default "2"
 
 config TEGRA_STAT_MON
         bool "Enable H/W statistics monitor"
@@ -652,7 +645,7 @@ config TEGRA_GADGET_BOOST_CPU_FREQ
 	help
 	  Devices need to boost frequency of CPU when they are connected
 	  to host pc through usb cable for better performance. This value
-	  is the amount of the frequency (in mhz) to be boosted. If it is
+	  is the amount of the frequency (in Mhz) to be boosted. If it is
 	  zero boosting frequency will not be enabled. This value will be
 	  used only by usb gadget driver.
 

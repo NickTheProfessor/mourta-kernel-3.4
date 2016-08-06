@@ -24,7 +24,6 @@
  */
 #include <linux/module.h>
 #include <linux/delay.h>
-#include <linux/earlysuspend.h>
 #include <linux/hrtimer.h>
 #include <linux/gpio.h>
 #include <linux/i2c.h>

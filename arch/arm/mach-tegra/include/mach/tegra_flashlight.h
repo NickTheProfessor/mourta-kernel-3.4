@@ -19,7 +19,6 @@
 
 #ifndef __ASM_ARCH_MSM8X50_FLASHLIGHT_H
 #define __ASM_ARCH_MSM8X50_FLASHLIGHT_H
-#include <linux/earlysuspend.h>
 
 #define FLASHLIGHT_NAME "flashlight"
 

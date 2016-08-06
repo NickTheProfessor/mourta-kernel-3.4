@@ -9,7 +9,6 @@
 #include <asm/mach-types.h>
 #include <linux/platform_device.h>
 #include <linux/spi/spi.h>
-#include <linux/earlysuspend.h>
 #include <linux/nvhost.h>
 #include <linux/nvmap.h>
 #include <mach/irqs.h>
@@ -62,7 +61,6 @@ static u16 gpio_bridge_reset_n;
 static DEFINE_MUTEX(bridge_init_mutex);
 
 static struct spi_device *bridge_spi;
-static struct early_suspend ssd2825_bridge_early_suspend;
 #define FALSE 0
 #define TRUE 1
 static int x3_bridge_on = FALSE;
@@ -977,20 +975,6 @@ DEVICE_ATTR(reg_dump, 0660, NULL, ssd2825_bridge_store_reg_dump);
 DEVICE_ATTR(reg_read, 0660, NULL, ssd2825_bridge_reg_read);
 DEVICE_ATTR(reg_read2, 0660, NULL, ssd2825_bridge_reg_read2);
 
-void ssd2825_bridge_spi_suspend(struct early_suspend * h)
-{
-/*                                 *//*2012/01/19*/
-	ssd2825_disable_end = FALSE;
-	printk(KERN_INFO "%s start \n", __func__);
-#ifdef CONFIG_ESD_REG_CHECK
-	cancel_delayed_work_sync(&work_instance->work_reg_check);
-#endif
-	ssd2825_bridge_disable();
-
-	printk(KERN_INFO "%s end \n", __func__);
-	//return 0;
-}
-
 void ssd2825_bridge_spi_shutdown(struct spi_device *spi)
 {
 	int ret;
@@ -1002,19 +986,6 @@ void ssd2825_bridge_spi_shutdown(struct spi_device *spi)
 	cancel_delayed_work_sync(&work_instance->work_reg_check);
 #endif
 	ssd2825_bridge_disable();
-}
-
-void ssd2825_bridge_spi_resume(struct early_suspend * h)
-{
-	printk(KERN_INFO "%s start \n", __func__);
-#ifdef CONFIG_ESD_REG_CHECK
-	schedule_delayed_work(&work_instance->work_reg_check, msecs_to_jiffies(100));
-#endif
-	if (cmdlineRGBvalue.table_type==GAMMA_NV_RETURNED)
-		ssd2825_bridge_rgb_update();
-
-	printk(KERN_INFO "%s end \n", __func__);
-	//return 0;
 }
 
 static int ssd2825_bridge_reboot_notify(struct notifier_block *nb,
@@ -1187,11 +1158,6 @@ static int ssd2825_bridge_spi_probe(struct spi_device *spi)
 	err = device_create_file(&spi->dev, &dev_attr_gamma_lut);
 
 	bridge_spi = spi;
-
-	ssd2825_bridge_early_suspend.level = EARLY_SUSPEND_LEVEL_DISABLE_FB-10;
-	ssd2825_bridge_early_suspend.suspend = ssd2825_bridge_spi_suspend;
-	ssd2825_bridge_early_suspend.resume = ssd2825_bridge_spi_resume;
-	register_early_suspend(&ssd2825_bridge_early_suspend);
 
 	register_reboot_notifier(&ssd2825_bridge_reboot_nb);
 

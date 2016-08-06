@@ -24,10 +24,6 @@
 #include <linux/spinlock.h>
 #include <linux/delay.h>
 #include <linux/err.h>
-//                    
-#ifdef CONFIG_MACH_X3
-#include <linux/earlysuspend.h>
-#endif
 #include <linux/io.h>
 #include <linux/clk.h>
 #include <linux/cpufreq.h>
@@ -319,14 +315,7 @@
 
 //                    
 #ifdef CONFIG_MACH_X3
-#ifdef CONFIG_HAS_EARLYSUSPEND
-#define EARLY_SUSPEND_MIN_CPU_FREQ	51000000
-#define ACTIVE_MIN_CPU_FREQ		51000000
 #define SCLK_MIN_FREQ			12000000
-static struct cpufreq_frequency_table *selected_cpufreq_table;
-#else
-#define SCLK_MIN_FREQ			40000000
-#endif
 #endif /* CONFIG_MACH_X3 */
 
 static void tegra3_pllp_init_dependencies(unsigned long pllp_rate);
@@ -819,7 +808,7 @@ static struct clk tegra3_clk_twd = {
 		 atomic context which cannot take a mutex. */
 	.name     = "twd",
 	.ops      = &tegra3_twd_ops,
-	.max_rate = 1700000000,	/* Same as tegra_clk_cpu_cmplx.max_rate */
+	.max_rate = 1500000000,	/* Same as tegra_clk_cpu_cmplx.max_rate */
 	.mul      = 1,
 	.div      = 2,
 };
@@ -4054,7 +4043,6 @@ static struct clk tegra_clk_virtual_cpu_g = {
 	.parent    = &tegra_clk_cclk_g,
 	.ops       = &tegra_cpu_ops,
 	.max_rate  = 1700000000,
-//	.min_rate  = 255000000,
 	.u.cpu = {
 		.main      = &tegra_pll_x,
 		.backup    = &tegra_pll_p,
@@ -5327,33 +5315,6 @@ static void tegra_clk_resume(void)
 #define tegra_clk_resume NULL
 #endif
 
-//                    
-#ifdef CONFIG_MACH_X3
-#ifdef CONFIG_HAS_EARLYSUSPEND
-
-static struct early_suspend tegra3_clk_early_suspender;
-
-static void tegra3_clk_early_suspend(struct early_suspend *h)
-{
-	struct clk *cpu_clk_lp = &tegra_clk_virtual_cpu_lp;
-
-	cpu_clk_lp->min_rate = EARLY_SUSPEND_MIN_CPU_FREQ;
-
-    pr_info("%s: min_rate = %lu\n", __func__, cpu_clk_lp->min_rate);
-}
-
-static void tegra3_clk_late_resume(struct early_suspend *h)
-{
-	struct clk *cpu_clk_lp = &tegra_clk_virtual_cpu_lp;
-
-	cpu_clk_lp->min_rate = ACTIVE_MIN_CPU_FREQ;
-
-    pr_info("%s: min_rate = %lu\n", __func__, cpu_clk_lp->min_rate);
-}
-#endif
-
-#endif /* CONFIG_MACH_X3 */
-
 static struct syscore_ops tegra_clk_syscore_ops = {
 	.suspend = tegra_clk_suspend,
 	.resume = tegra_clk_resume,
@@ -5651,12 +5612,4 @@ void __init tegra30_init_clocks(void)
 	tegra_init_cpu_edp_limits(0);
 
 	register_syscore_ops(&tegra_clk_syscore_ops);
-//                    
-#ifdef CONFIG_MACH_X3
-#ifdef CONFIG_HAS_EARLYSUSPEND
-	tegra3_clk_early_suspender.suspend = tegra3_clk_early_suspend;
-	tegra3_clk_early_suspender.resume = tegra3_clk_late_resume;
-	register_early_suspend(&tegra3_clk_early_suspender);
-#endif
-#endif /* CONFIG_MACH_X3 */
 }
