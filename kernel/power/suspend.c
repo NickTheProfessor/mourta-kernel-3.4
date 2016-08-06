@@ -30,12 +30,6 @@
 
 #include "power.h"
 
-#ifdef CONFIG_MACH_X3
-#include <linux/rtc.h>
-
-static int sleepEnter = 0;
-#endif
-
 const char *const pm_states[PM_SUSPEND_MAX] = {
 	[PM_SUSPEND_FREEZE]	= "freeze",
 	[PM_SUSPEND_STANDBY]	= "standby",
@@ -43,14 +37,6 @@ const char *const pm_states[PM_SUSPEND_MAX] = {
 };
 
 static const struct platform_suspend_ops *suspend_ops;
-
-#ifdef CONFIG_ARCH_TEGRA_3x_SOC
-static bool resume_from_deep_suspend;
-bool is_resume_from_deep_suspend(void)
-{
-	return resume_from_deep_suspend;
-}
-#endif
 
 static bool need_suspend_ops(suspend_state_t state)
 {
@@ -199,6 +185,9 @@ static int suspend_enter(suspend_state_t state, bool *wakeup)
 			goto Platform_wake;
 	}
 
+	if (suspend_test(TEST_PLATFORM))
+		goto Platform_wake;
+
 	/*
 	 * PM_SUSPEND_FREEZE equals
 	 * frozen processes + suspended devices + idle processors.
@@ -209,9 +198,6 @@ static int suspend_enter(suspend_state_t state, bool *wakeup)
 		freeze_enter();
 		goto Platform_wake;
 	}
-
-	if (suspend_test(TEST_PLATFORM))
-		goto Platform_wake;
 
 	error = disable_nonboot_cpus();
 	if (error || suspend_test(TEST_CPUS))
@@ -225,15 +211,9 @@ static int suspend_enter(suspend_state_t state, bool *wakeup)
 		*wakeup = pm_wakeup_pending();
 		if (!(suspend_test(TEST_CORE) || *wakeup)) {
 			error = suspend_ops->enter(state);
-			resume_from_deep_suspend = 1;
 			events_check_enabled = false;
-		} else if (*wakeup) {
-			error = -EBUSY;
 		}
 		syscore_resume();
-#ifdef CONFIG_MACH_LGE
-	sleepEnter = 1;
-#endif
 	}
 
 	arch_suspend_enable_irqs();
@@ -293,22 +273,6 @@ int suspend_devices_and_enter(suspend_state_t state)
  Resume_devices:
 	suspend_test_start();
 	dpm_resume_end(PMSG_RESUME);
-
-#ifdef CONFIG_MACH_X3
-    //
-    if(sleepEnter == 1){
-        struct timespec ts;
-        struct rtc_time tm;
-        getnstimeofday(&ts);
-        rtc_time_to_tm(ts.tv_sec, &tm);
-        printk("%d-%02d-%02d %02d:%02d:%02d.%06lu\n",
-            tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday,
-            tm.tm_hour, tm.tm_min, tm.tm_sec, ts.tv_nsec/1000);
-        sleepEnter = 0;
-    }
-    //
-#endif
-
 	suspend_test_finish("resume devices");
 	ftrace_start();
 	resume_console();
@@ -355,9 +319,6 @@ static int enter_state(suspend_state_t state)
 	if (!mutex_trylock(&pm_mutex))
 		return -EBUSY;
 
-#ifdef CONFIG_ARCH_TEGRA_3x_SOC
-	resume_from_deep_suspend = 0;
-#endif
 	if (state == PM_SUSPEND_FREEZE)
 		freeze_begin();
 
