@@ -23,7 +23,6 @@
 #include <linux/platform_device.h>
 #include <linux/kthread.h>
 #include <linux/delay.h>
-#include <linux/earlysuspend.h>
 #include <linux/i2c.h>
 #include <linux/freezer.h>
 #include <linux/slab.h>
@@ -42,13 +41,7 @@ struct lge_touch_driver
 	struct touch_interrupt_func*	h_interrupt;
 	struct touch_finger_data_func*	h_fingerData;
 	struct touch_finger_data		finger_data;
-	struct early_suspend			early_suspend;
 };
-
-#ifdef CONFIG_HAS_EARLYSUSPEND
-static void touch_early_suspend(struct early_suspend *es);
-static void touch_late_resume(struct early_suspend *es);
-#endif
 
 static bool create_touch_object(struct lge_touch_driver **touch_object);
 static void remove_touch_object(struct lge_touch_driver *touch);
@@ -187,13 +180,6 @@ static int __init touch_probe(struct i2c_client *client, const struct i2c_device
 
 	i2c_set_clientdata(client, touch);
 
-#ifdef CONFIG_HAS_EARLYSUSPEND
-	touch->early_suspend.level = EARLY_SUSPEND_LEVEL_BLANK_SCREEN + 1;
-	touch->early_suspend.suspend = touch_early_suspend;
-	touch->early_suspend.resume = touch_late_resume;
-	register_early_suspend(&touch->early_suspend);
-#endif
-
 	DEBUG_MSG(E, "[TOUCH] touch_driver is initialized.\n");
 
 	return 0;
@@ -217,9 +203,6 @@ static int touch_remove(struct i2c_client *client)
 {
 	struct lge_touch_driver *touch = i2c_get_clientdata(client);
 
-#ifdef CONFIG_HAS_EARLYSUSPEND
-	unregister_early_suspend(&touch->early_suspend);
-#endif
 	touch->h_inputDev->close(touch->h_touch);
 	touch->h_task->close(touch->h_touch);
 	touch->h_interrupt->close(touch->h_touch);
@@ -229,24 +212,6 @@ static int touch_remove(struct i2c_client *client)
 	return 0;
 }
 
-#ifdef CONFIG_HAS_EARLYSUSPEND
-static void touch_early_suspend(struct early_suspend *es)
-{
-	struct lge_touch_driver *touch = container_of(es, struct lge_touch_driver, early_suspend);
-
-	touch->h_interrupt->disable(touch->h_touch);
-	touch->h_powerCtrl->sleep(touch->h_touch);
-}
-
-static void touch_late_resume(struct early_suspend *es)
-{
-	struct lge_touch_driver *touch = container_of(es, struct lge_touch_driver, early_suspend);
-
-	touch->h_powerCtrl->wake(touch->h_touch);
-	touch->h_interrupt->enable(touch->h_touch);
-	init_touch_device_setting(touch->h_touch);
-}
-#else
 static int touch_suspend(struct i2c_client *client, pm_message_t state)
 {
 	struct lge_touch_driver *touch = i2c_get_clientdata(client);
@@ -271,7 +236,6 @@ static int touch_resume(struct i2c_client *client)
 err_touch_resume:
 	return -1;
 }
-#endif
 
 static const struct i2c_device_id lge_ts_id[] = {
 	{ LGE_TOUCH_NAME, 0 },
@@ -280,10 +244,8 @@ static const struct i2c_device_id lge_ts_id[] = {
 static struct i2c_driver lge_touch_driver = {
 	.probe   = touch_probe,
 	.remove	 = touch_remove,
-#ifndef CONFIG_HAS_EARLYSUSPEND
 	.suspend = touch_suspend,
 	.resume	 = touch_resume,
-#endif
 	.id_table = lge_ts_id,
 	.driver	 = {
 		.name   = LGE_TOUCH_NAME,

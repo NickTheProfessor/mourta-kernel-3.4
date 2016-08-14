@@ -30,10 +30,6 @@
 #include <linux/list.h>
 #include <linux/interrupt.h>
 
-#ifdef CONFIG_HAS_EARLYSUSPEND
-#include <linux/earlysuspend.h>
-#endif
-
 
 /* Permissions for sysfs attributes.  Since the permissions policy will change
  * on a global basis in the future, rather than edit all sysfs attrs everywhere
@@ -477,9 +473,6 @@ struct rmi_device {
 	struct rmi_driver *driver;
 	struct rmi_phys_device *phys;
 
-#ifdef CONFIG_HAS_EARLYSUSPEND
-	struct early_suspend early_suspend_handler;
-#endif
 };
 #define to_rmi_device(d) container_of(d, struct rmi_device, dev);
 #define to_rmi_platform_data(d) ((d)->phys->dev->platform_data);

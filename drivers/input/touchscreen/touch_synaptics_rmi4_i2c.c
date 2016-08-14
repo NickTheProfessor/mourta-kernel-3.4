@@ -141,11 +141,6 @@ typedef struct {
 	unsigned char finger_data[MAX_NUM_OF_FINGER][NUM_OF_EACH_FINGER_DATA_REG];
 } ts_sensor_data;
 
-#if defined(CONFIG_HAS_EARLYSUSPEND)
-static void synaptics_ts_early_suspend(struct early_suspend *h);
-static void synaptics_ts_late_resume(struct early_suspend *h);
-#endif
-
 #if defined(CONFIG_LGE_TOUCH_SYNAPTICS_FW_UPGRADE)
 extern int FirmwareUpgrade(struct synaptics_ts_data *ts);
 extern unsigned char get_fw_image_rev(void);
@@ -1587,13 +1582,6 @@ static int synaptics_ts_probe(struct i2c_client *client, const struct i2c_device
 		SYNAPTICS_DEBUG_MSG("Start touchscreen %s in %s mode\n",
 				ts->input_dev->name, ts->pdata->use_irq ? "interrupt" : "polling");
 
-#if defined(CONFIG_HAS_EARLYSUSPEND)
-	ts->early_suspend.level = EARLY_SUSPEND_LEVEL_BLANK_SCREEN + 1;
-	ts->early_suspend.suspend = synaptics_ts_early_suspend;
-	ts->early_suspend.resume = synaptics_ts_late_resume;
-	register_early_suspend(&ts->early_suspend);
-#endif
-
 	/* Register sysfs hooks */
 	ret = sysfs_create_group(&client->dev.kobj, &synaptics_ts_attribute_group);
 	if (ret < 0) {
@@ -1618,7 +1606,6 @@ exit_sysfs_create_group_failed:
 	sysfs_remove_group(&client->dev.kobj, &synaptics_ts_attribute_group);
 	if (ts->pdata->use_irq)
 		free_irq(ts->client->irq, ts);
-	unregister_early_suspend(&ts->early_suspend);
 err_input_register_device_failed:
 	input_free_device(ts->input_dev);
 err_input_dev_alloc_failed:
@@ -1638,7 +1625,6 @@ static int synaptics_ts_remove(struct i2c_client *client)
 
 
 	sysfs_remove_group(&client->dev.kobj, &synaptics_ts_attribute_group);
-	unregister_early_suspend(&ts->early_suspend);
 
 	if (ts->pdata->use_irq)
 		free_irq(client->irq, ts);
@@ -1775,35 +1761,6 @@ static void synaptics_ts_resume_func(struct synaptics_ts_data *ts)
 				HRTIMER_MODE_REL);
 }
 
-#if defined(CONFIG_HAS_EARLYSUSPEND)
-static void synaptics_ts_early_suspend(struct early_suspend *h)
-{
-	struct synaptics_ts_data *ts =
-			container_of(h, struct synaptics_ts_data, early_suspend);
-
-	if (synaptics_rmi4_i2c_debug_mask & SYNAPTICS_RMI4_I2C_DEBUG_FUNC_TRACE)
-		SYNAPTICS_DEBUG_MSG("\n");
-
-	if (likely(!ts->is_downloading))
-		synaptics_ts_suspend_func(ts);
-
-	ts->is_suspended = 1;
-}
-
-static void synaptics_ts_late_resume(struct early_suspend *h)
-{
-	struct synaptics_ts_data *ts =
-			container_of(h, struct synaptics_ts_data, early_suspend);
-
-	if (synaptics_rmi4_i2c_debug_mask & SYNAPTICS_RMI4_I2C_DEBUG_FUNC_TRACE)
-		SYNAPTICS_DEBUG_MSG ("\n");
-
-	if (likely(!ts->is_downloading))
-		synaptics_ts_resume_func(ts);
-
-	ts->is_suspended = 0;
-}
-#endif
 
 static const struct i2c_device_id synaptics_ts_id[] = {
 	{SYNATICS_DEVICE_NAME, 0},

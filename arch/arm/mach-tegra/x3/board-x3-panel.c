@@ -23,7 +23,6 @@
 #include <linux/regulator/consumer.h>
 #include <linux/resource.h>
 #include <linux/platform_device.h>
-#include <linux/earlysuspend.h>
 #include <linux/tegra_pwm_bl.h>
 #include <linux/pwm_backlight.h>
 #include <linux/nvhost.h>
@@ -681,80 +680,6 @@ static struct platform_device *x3_bl_devices[]  = {
 	&x3_disp1_backlight_device,
 };
 
-#ifdef CONFIG_HAS_EARLYSUSPEND
-/* put early_suspend/late_resume handlers here for the display in order
- * to keep the code out of the display driver, keeping it closer to upstream
- */
-struct early_suspend x3_panel_early_suspender;
-
-struct rgb_bridge_gpio {
-	char *name;
-	int gpio;
-};
-static int rgb_bridge_gpio_init;
-
-#if defined(CONFIG_MACH_RGB_CONVERTOR_SPI)
-static struct rgb_bridge_gpio rgb_bridge_gpios[] = {
-	{ "LCD_RGB_DE",		TEGRA_GPIO_PJ1 },
-	{ "LCD_RGB_HSYNC",	TEGRA_GPIO_PJ3 },
-	{ "LCD_RGB_VSYNC",	TEGRA_GPIO_PJ4 },
-	{ "LCD_RGB_PCLK",	TEGRA_GPIO_PB3 },
-};
-#else
-static int rgb_bridge_gpios[] = { };
-#endif /* defined(CONFIG_MACH_RGB_CONVERTOR_SPI) */
-
-extern const int gpio_to_pingroup[];
-
-static void x3_panel_early_suspend(struct early_suspend *h)
-{
-	unsigned i;
-//	printk("%s \n", __func__);
-	for (i = 0; i < num_registered_fb; i++){
-		if(1 != i)//                                                                                          
-			fb_blank(registered_fb[i], FB_BLANK_POWERDOWN);
-	}
-
-	if (!rgb_bridge_gpio_init && ARRAY_SIZE(rgb_bridge_gpios) > 0) {
-		for (i = 0; i < ARRAY_SIZE(rgb_bridge_gpios); i++)
-			gpio_request(rgb_bridge_gpios[i].gpio,
-						 rgb_bridge_gpios[i].name);
-		rgb_bridge_gpio_init = 1;
-	}
-
-	for (i = 0; i < ARRAY_SIZE(rgb_bridge_gpios); i++) {
-		tegra_pinmux_set_tristate(
-			gpio_to_pingroup[rgb_bridge_gpios[i].gpio],
-			TEGRA_TRI_TRISTATE);
-		gpio_direction_input(rgb_bridge_gpios[i].gpio);
-		tegra_gpio_enable(rgb_bridge_gpios[i].gpio);
-	}
-#ifdef CONFIG_TEGRA_CONVSERVATIVE_GOV_ON_EARLYSUPSEND
-	cpufreq_store_default_gov();
-	cpufreq_change_gov(cpufreq_conservative_gov);
-#endif
-}
-
-static void x3_panel_late_resume(struct early_suspend *h)
-{
-	unsigned i;
-#ifdef CONFIG_TEGRA_CONVSERVATIVE_GOV_ON_EARLYSUPSEND
-	cpufreq_restore_default_gov();
-#endif
-	for (i = 0; i < ARRAY_SIZE(rgb_bridge_gpios); i++) {
-		tegra_pinmux_set_tristate(
-			gpio_to_pingroup[rgb_bridge_gpios[i].gpio],
-			TEGRA_TRI_NORMAL);
-		tegra_gpio_disable(rgb_bridge_gpios[i].gpio);
-	}
-
-	for (i = 0; i < num_registered_fb; i++){
-		if(1 != i) // hdmi id is 1
-			fb_blank(registered_fb[i], FB_BLANK_UNBLANK);
-	}
-	printk("%s ended \n", __func__);
-}
-#endif
 
 #if defined(CONFIG_MACH_RGB_CONVERTOR_SPI)
 static struct bridge_platform_data rgb_platform_data1 = {
@@ -881,12 +806,6 @@ int __init x3_panel_init(void)
 	bridge_work_queue =
 		create_singlethread_workqueue("bridge_spi_transaction");
 
-#ifdef CONFIG_HAS_EARLYSUSPEND
-	x3_panel_early_suspender.suspend = x3_panel_early_suspend;
-	x3_panel_early_suspender.resume = x3_panel_late_resume;
-	x3_panel_early_suspender.level = EARLY_SUSPEND_LEVEL_DISABLE_FB;
-	register_early_suspend(&x3_panel_early_suspender);
-#endif
 
 	return err;
 }
