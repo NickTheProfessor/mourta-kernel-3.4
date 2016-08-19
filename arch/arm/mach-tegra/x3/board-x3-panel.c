@@ -494,14 +494,8 @@ static struct tegra_dc_sd_settings x3_sd_settings = {
 			},
 		},
 	.sd_brightness = &sd_brightness,
-//	.bl_device = &x3_backlight_device,
-#if IS_EXTERNAL_PWM
 	.bl_device_name = "pwm-backlight",
-#else
-	.bl_device_name = "tegra-pwm-bl",
-#endif
 };
-//#endif
 
 static struct tegra_fb_data x3_fb_data = {
     .win        = 0,

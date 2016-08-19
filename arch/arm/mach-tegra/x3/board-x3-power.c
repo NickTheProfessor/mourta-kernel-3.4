@@ -466,7 +466,7 @@ static struct tegra_suspend_platform_data x3_suspend_data = {
 
 	.board_suspend = x3_board_suspend,
 	.board_resume = x3_board_resume,
-#ifdef CONFIG_TEGRA_LP1_950
+#ifdef CONFIG_TEGRA_LP1_LOW_COREVOLTAGE
 	.lp1_lowvolt_support = true,
 	.i2c_base_addr = TEGRA_I2C5_BASE,
 	.pmuslave_addr = 0x24,
