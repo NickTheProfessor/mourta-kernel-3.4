@@ -126,7 +126,7 @@ static void lm3533_hw_reset(struct lm3533_device *dev)
 	if(dev->bl_status == BL_OFF){
 		if (gpio_is_valid(gpio)) {
 			gpio_direction_output(gpio, 1);
-			gpio_set_value(gpio, 1);
+			gpio_set_value_cansleep(gpio, 1);
 			mdelay(2);
 		}
 	}

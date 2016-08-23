@@ -58,10 +58,6 @@ enum {
 	WAKE_LEVEL_ANY
 };
 
-#ifdef CONFIG_MACH_X3
-extern unsigned long long wake_status_backup;
-#endif
-
 static void __iomem *pmc = IO_ADDRESS(TEGRA_PMC_BASE);
 
 static u64 tegra_lp0_wake_enb;
@@ -97,8 +93,6 @@ module_param(debug_lp0, bool, S_IRUGO | S_IWUSR);
 
 static bool warn_prevent_lp0;
 module_param(warn_prevent_lp0, bool, S_IRUGO | S_IWUSR);
-
-int global_wakeup_state;
 
 bool tegra_pm_irq_lp0_allowed(void)
 {
@@ -269,10 +263,6 @@ static void tegra_pm_irq_syscore_resume_helper(
 		pr_info("Resume caused by WAKE%d, %s\n", (wake + 32 * index),
 			desc->action->name);
 
-		global_wakeup_state = (wake + 32 * index);
-		pr_info("global_wakeup_state is %d, wake_status is %ld\n",
-				global_wakeup_state, wake_status);
-
 		tegra_wake_irq_count[wake + 32 * index]++;
 
 		generic_handle_irq(irq);
@@ -282,9 +272,6 @@ static void tegra_pm_irq_syscore_resume_helper(
 static void tegra_pm_irq_syscore_resume(void)
 {
 	unsigned long long wake_status = read_pmc_wake_status();
-#ifdef CONFIG_MACH_X3
-	wake_status_backup = wake_status;
-#endif
 
 	pr_info(" legacy wake status=0x%x\n", (u32)wake_status);
 	tegra_pm_irq_syscore_resume_helper((unsigned long)wake_status, 0);
@@ -479,9 +466,6 @@ static int tegra_pm_irq_syscore_suspend(void)
 skip_usb_any_wake:
 #endif
 	write_pmc_wake_level(wake_level);
-#ifdef CONFIG_MACH_X3
-	write_pmc_wake_level(wake_level); /* Do it twice */
-#endif
 
 	write_pmc_wake_mask(wake_enb);
 

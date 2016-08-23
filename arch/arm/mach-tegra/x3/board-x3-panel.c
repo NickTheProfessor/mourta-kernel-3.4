@@ -55,17 +55,14 @@ extern int ssd2825_bridge_disable(void);
 #endif
 
 #define x3_hdmi_hpd	TEGRA_GPIO_PN7
-#define TRUE 1
-#define FALSE 0
-bool x3_hddisplay_on = FALSE;
+static bool first_disp_boot = true;
+bool x3_hddisplay_on = false;
 static struct workqueue_struct *bridge_work_queue;
 static struct regulator *x3_hdmi_reg = NULL;
 static struct regulator *x3_hdmi_pll = NULL;
 static struct regulator *x3_hdmi_vddio = NULL;
 
 static atomic_t sd_brightness = ATOMIC_INIT(255);
-
-unsigned long long wake_status_backup=0; //                                                                  
 
 static tegra_dc_bl_output x3_bl_output_measured = {
 	1, 5, 9, 10, 11, 12, 12, 13,
@@ -125,6 +122,7 @@ static int x3_backlight_notify(struct device *unused, int brightness)
 	return brightness;
 }
 
+static int x3_disp1_check_fb(struct device *dev, struct fb_info *info);
 
 static struct platform_tegra_pwm_backlight_data x3_disp1_backlight_data = {
 	.which_dc	= 0,
@@ -132,6 +130,8 @@ static struct platform_tegra_pwm_backlight_data x3_disp1_backlight_data = {
 	.max_brightness	= 255,
 	.dft_brightness	= 224,
 	.notify 	= x3_backlight_notify,
+	/* Only toggle backlight on fb blank notifications for disp1 */
+	.check_fb	= x3_disp1_check_fb,
 	.period 		= 0xFF,
 	.clk_div		= 0x3FF,
 	.clk_select 	= 0,
@@ -145,7 +145,8 @@ static struct platform_device x3_disp1_backlight_device = {
 	},
 };
 
-static int x3_backlight_init(struct device *dev) {
+static int x3_backlight_init(struct device *dev)
+{
 	return 0;
 }
 
@@ -156,7 +157,10 @@ static struct platform_pwm_backlight_data x3_backlight_data = {
 	.dft_brightness	= 224,
 	.pwm_period_ns	= 5000000,
 	.init		= x3_backlight_init,
+//	.exit		= x3_backlight_exit,
 	.notify		= x3_backlight_notify,
+	/* Only toggle backlight on fb blank notifications for disp1 */
+	.check_fb	= x3_disp1_check_fb,
 };
 
 static struct platform_device x3_backlight_device = {
@@ -167,55 +171,23 @@ static struct platform_device x3_backlight_device = {
 	},
 };
 
-static bool first_disp_boot = TRUE;
 static int x3_panel_enable(struct device *dev)
 {
-	printk("%s -- x3_hddisplay_on:%d \n",__func__,x3_hddisplay_on);
 	if(!x3_hddisplay_on){
-#if defined(CONFIG_MACH_RGB_CONVERTOR_SPI)
-		//printk("system_state:%d, first_disp_boot:%d \n",system_state,first_disp_boot);
-		if((system_state != SYSTEM_BOOTING) && (first_disp_boot != TRUE)){
-			/*
-			 * This will be NULL by x3_bridge_on
-			 * when device is woken from LP0, however,
-			 * this is needed to be called in
-			 * late resume right after early suspend
-			 */
-			x3_hddisplay_on = TRUE;
+			x3_hddisplay_on = true;
 			ssd2825_bridge_enable();
-			return 0;
-		}
-		else{
-			first_disp_boot = FALSE;
-		}
-#endif
-	x3_hddisplay_on = TRUE;
 	}
+//	printk("x3_hddisplay_on: %d \n",x3_hddisplay_on);
 	return 0;
 }
 
 static int x3_panel_disable(void)
 {
-	printk("%s --x3_hddisplay_on:%d \n", __func__,x3_hddisplay_on);
 	if(x3_hddisplay_on) {
-		//ssd2825_bridge_disable();
-		x3_hddisplay_on = FALSE;
+		ssd2825_bridge_disable();
+		x3_hddisplay_on = false;
 	}
-
-	return 0;
-}
-
-static int x3_panel_postsuspend(void)
-{
-	/*
-	 * if ssd2825_bridge_disable is called in early suspend,
-	 * below will be NULL by x3_bridge_on,
-	 * however, there's case dc resume and dc suspend
-	 * without lcd late resume/early suspend,
-	 * in this case, bridge is enabled in dc_resume,
-	 * so, bridge needs to be disabled in dc_suspend.
-	 */
-	ssd2825_bridge_disable();
+//	printk("x3_hddisplay_on: %d \n",x3_hddisplay_on);
 	return 0;
 }
 
@@ -555,26 +527,15 @@ static struct tegra_dc_platform_data x3_disp2_pdata = {
 	.emc_clk_rate	= 300000000,
 };
 
-/*
-static u8 x3_dc_out_pin_sel_config[] = {
-	TEGRA_PIN_OUT_CONFIG_SEL_LM1_PM1,
-};
-*/
-
-static void ssd2825_bridge_enable_worker(struct work_struct *work) {
-	printk("ssd2825_bridge_enable_worker : %llu\n",wake_status_backup );
-
-	if( (wake_status_backup & TEGRA_WAKE_GPIO_PC7) ||
-	    (wake_status_backup & TEGRA_WAKE_GPIO_PO4)
-   )
-	{
-		ssd2825_bridge_enable();
-	}
+static void ssd2825_bridge_enable_worker(struct work_struct *work)
+{
+//	printk("ssd2825_bridge_enable_worker: prepoweron\n");
+	ssd2825_bridge_enable();
 };
 
 static DECLARE_WORK(bridge_work, ssd2825_bridge_enable_worker);
 
-int ssd2825_bridge_enable_queue(void)
+static int ssd2825_bridge_enable_queue(void)
 {
 	if (!x3_hddisplay_on)
 		queue_work(bridge_work_queue, &bridge_work);
@@ -602,7 +563,6 @@ static struct tegra_dc_out x3_disp1_out = {
 
 	.enable		= x3_panel_enable,
 	.disable	= x3_panel_disable,
-	.postsuspend	= x3_panel_postsuspend,
 	.prepoweron	= ssd2825_bridge_enable_queue,
 };
 
@@ -627,6 +587,10 @@ static struct platform_device x3_disp1_device = {
 	},
 };
 
+static int x3_disp1_check_fb(struct device *dev, struct fb_info *info)
+{
+	return info->device == &x3_disp1_device.dev;
+}
 static struct platform_device x3_disp2_device = {
 	.name		= "tegradc",
 	.id		= 1,
@@ -637,7 +601,7 @@ static struct platform_device x3_disp2_device = {
 	},
 };
 
-#if defined(CONFIG_TEGRA_NVMAP)
+#ifdef CONFIG_TEGRA_NVMAP
 static struct nvmap_platform_carveout x3_carveouts[] = {
 	[0] = NVMAP_HEAP_CARVEOUT_IRAM_INIT,
 	[1] = {
@@ -667,13 +631,13 @@ static struct platform_device *x3_gfx_devices[] __initdata = {
 #if defined(CONFIG_TEGRA_NVMAP)
 	&x3_nvmap_device,
 #endif
+	&tegra_pwfm0_device,
 	&x3_backlight_device,
 };
 
 static struct platform_device *x3_bl_devices[]  = {
 	&x3_disp1_backlight_device,
 };
-
 
 #if defined(CONFIG_MACH_RGB_CONVERTOR_SPI)
 static struct bridge_platform_data rgb_platform_data1 = {
