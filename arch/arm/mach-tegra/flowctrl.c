@@ -3,7 +3,7 @@
  *
  * functions and macros to control the flowcontroller
  *
- * Copyright (c) 2010-2012, NVIDIA Corporation. All rights reserved.
+ * Copyright (c) 2010-2013, NVIDIA CORPORATION. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms and conditions of the GNU General Public License,
@@ -22,9 +22,10 @@
 #include <linux/kernel.h>
 #include <linux/io.h>
 
-#include <mach/iomap.h>
+#include <asm/barrier.h>
 
 #include "flowctrl.h"
+#include <mach/iomap.h>
 
 u8 flowctrl_offset_halt_cpu[] = {
 	FLOW_CTRL_HALT_CPU0_EVENTS,
@@ -44,7 +45,7 @@ static void flowctrl_update(u8 offset, u32 value)
 {
 	void __iomem *addr = IO_ADDRESS(TEGRA_FLOW_CTRL_BASE) + offset;
 
-	writel(value, addr);
+	writel_relaxed(value, addr);
 
 	/* ensure the update has reached the flow controller */
 	wmb();
