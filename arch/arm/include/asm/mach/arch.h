@@ -12,7 +12,6 @@
 
 struct tag;
 struct meminfo;
-struct sys_timer;
 struct pt_regs;
 struct arm_soc_desc;
 
